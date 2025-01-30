@@ -4,6 +4,7 @@ import WhatsAppStatuses from "../Reutilizables/WhatsApp/WhatsAppStatuses"
 import BusinessCard from "../Reutilizables/Business/BusinessCard"
 import NotificationsRest from "../actions/NotificationsRest"
 import NotificationItem from "./notification/NotificationItem"
+import Global from "../Utils/Global"
 
 const notificationsRest = new NotificationsRest();
 
@@ -17,7 +18,7 @@ const NavBar = ({ can, session = {}, title = '', whatsappStatus, businesses, APP
   const [theme, setTheme] = useState(settings.theme ?? 'ligth');
 
   useEffect(() => {
-    document.title = `${title} | Atalaya`
+    document.title = `${title} | ${Global.APP_NAME}`
     $(document).on('change', '#light-mode-check', (e) => {
       setTheme(e.target.checked ? 'dark' : 'ligth')
     })
@@ -139,7 +140,7 @@ const NavBar = ({ can, session = {}, title = '', whatsappStatus, businesses, APP
           </div>
         </li>
 
-        {can('whatsapp', 'root', 'all') && <li className="notification-list topbar-dropdown d-none d-lg-block">
+        {/* {can('whatsapp', 'root', 'all') && <li className="notification-list topbar-dropdown d-none d-lg-block">
           <a className="nav-link waves-effect waves-light" data-bs-toggle="modal" data-bs-target="#whatsapp-modal">
             <span className="position-relative">
               <i className="mdi mdi-whatsapp noti-icon"></i>
@@ -149,7 +150,7 @@ const NavBar = ({ can, session = {}, title = '', whatsappStatus, businesses, APP
 
             </span>
           </a>
-        </li>}
+        </li>} */}
 
         <li className="dropdown notification-list topbar-dropdown">
           <a className="nav-link dropdown-toggle waves-effect waves-light" data-bs-toggle="dropdown" href="#"

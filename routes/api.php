@@ -19,6 +19,7 @@ use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProcessController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RemainingHistoryController;
+use App\Http\Controllers\SessionController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\SubdomainController;
@@ -58,6 +59,14 @@ Route::middleware('auth')->group(function () {
     // Users sign Routes
     Route::post('/users/sign', [UserController::class, 'addSign']);
     Route::delete('/users/sign', [UserController::class, 'deleteSign']);
+
+    // Users routes
+    Route::get('/sessions/{id}', [SessionController::class, 'verify']);
+    Route::post('/sessions/ping', [SessionController::class, 'ping']);
+    Route::post('/sessions', [SessionController::class, 'save']);
+    Route::post('/sessions/paginate', [SessionController::class, 'paginate']);
+    Route::patch('/sessions/status', [SessionController::class, 'status']);
+    Route::delete('/sessions/{id}', [SessionController::class, 'delete']);
 
     // Users routes
     Route::post('/users', [UserController::class, 'save']);

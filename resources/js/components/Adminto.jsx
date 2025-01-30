@@ -23,7 +23,7 @@ const Adminto = ({ session, children, notificationsCount, title, can, WA_URL, AP
         <Footer />
       </div>
     </div>
-    {can('whatsapp', 'all') && <WhatsAppModal session={session} status={whatsappStatus} setStatus={setWhatsappStatus} WA_URL={WA_URL} APP_URL={APP_URL} />}
+    {/* {can('whatsapp', 'all') && <WhatsAppModal session={session} status={whatsappStatus} setStatus={setWhatsappStatus} WA_URL={WA_URL} APP_URL={APP_URL} />} */}
     <RigthBar />
     <div className="rightbar-overlay"></div>
   </>)

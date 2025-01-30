@@ -125,6 +125,7 @@ class BasicController extends Controller
       'global' => [
         'WA_URL' => env('WA_URL'),
         'PUBLIC_RSA_KEY' => Controller::$PUBLIC_RSA_KEY,
+        'APP_NAME' => env('APP_NAME', 'Waves'),
         'APP_PROTOCOL' => env('APP_PROTOCOL', 'https'),
         'APP_URL' => env('APP_URL'),
         'APP_DOMAIN' => env('APP_DOMAIN', 'atalaya.localhost'),
