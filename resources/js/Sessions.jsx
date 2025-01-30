@@ -1,16 +1,17 @@
 // Author: Manuel Gamboa
 
-import React, { useRef, useState } from 'react'
-import { createRoot } from 'react-dom/client'
-import Adminto from './components/Adminto'
-import CreateReactScript from './Utils/CreateReactScript'
+import Tippy from '@tippyjs/react';
+import React, { useRef, useState } from 'react';
+import { createRoot } from 'react-dom/client';
+import SessionCard from './Reutilizables/Sessions/SessionCard';
+import CreateReactScript from './Utils/CreateReactScript';
+import SessionsRest from './actions/SessionsRest';
+import Adminto from './components/Adminto';
 import Modal from './components/Modal';
 import InputFormGroup from './components/form/InputFormGroup';
 import TextareaFormGroup from './components/form/TextareaFormGroup';
-import googleSVG from './components/svg/google.svg'
-import SessionsRest from './actions/SessionsRest';
-import Tippy from '@tippyjs/react';
-import SessionCard from './Reutilizables/Sessions/SessionCard';
+import WhatsAppModal from './components/modals/WhatsAppModal';
+import googleSVG from './components/svg/google.svg';
 
 const sessionsRest = new SessionsRest()
 
@@ -18,6 +19,7 @@ const KPILeads = ({ sessions: sessionsDB = [] }) => {
 
   const modalRef = useRef()
   const pingModalRef = useRef()
+  const whatsAppModalRef = useRef()
 
   const sessionNameRef = useRef()
   const sessionIdRef = useRef()
@@ -44,6 +46,7 @@ const KPILeads = ({ sessions: sessionsDB = [] }) => {
   const [sessions, setSessions] = useState(sessionsDB)
   const [accountType, setAccountType] = useState(null)
   const [emailType, setEmailType] = useState(null)
+  const [sessionLoaded, setSessionLoaded] = useState(null)
 
   const onModalOpen = (data) => {
     setAccountType(data?.type ?? null)
@@ -114,12 +117,22 @@ const KPILeads = ({ sessions: sessionsDB = [] }) => {
     const result = await sessionsRest.save(request)
     if (!result) return
 
-    setSessions(old => ([...old, result]))
+    const existingSessionIndex = sessions.findIndex(session => session.id === result.id);
+    if (existingSessionIndex !== -1) {
+      setSessions(old => {
+        const updatedSessions = [...old];
+        updatedSessions[existingSessionIndex] = result;
+        return updatedSessions;
+      });
+    } else {
+      setSessions(old => ([...old, result]));
+    }
     $(modalRef.current).modal('hide')
   }
 
   const onPingModalOpen = (data) => {
     setAccountType(data.type)
+    sessionIdRef.current.value = data.id
     sessionNameRef.current.textContent = data.name
 
     if (data.type == 'Email') {
@@ -133,7 +146,7 @@ const KPILeads = ({ sessions: sessionsDB = [] }) => {
     $(pingModalRef.current).modal('show')
   }
 
-  const onPingSubmit = async (e) => {
+  const onPingSubmit = (e) => {
     e.preventDefault()
     const request = {
       from: sessionIdRef.current.value,
@@ -141,13 +154,19 @@ const KPILeads = ({ sessions: sessionsDB = [] }) => {
         ? sessionEmailToRef.current.value
         : sessionWhatsAppToRef.current.value
     }
+    sessionsRest.ping(request)
+  }
 
-    await sessionsRest.ping(request)
+  const onWhatsAppModalOpen = (data) => {
+    setSessionLoaded(data)
+    $(whatsAppModalRef.current).modal('show')
   }
 
   return <>
     <main className='d-flex align-items-center justify-content-center gap-2' style={{ height: 'calc(100vh - 160px)' }}>
-      <div className="card btn btn-light waves-effect" onClick={() => onModalOpen()}>
+      <div className="card btn btn-light waves-effect mb-0" onClick={() => onModalOpen()} style={{
+        height: '130px'
+      }}>
         <div className="card-body widget-user">
           <div className="d-flex align-items-center">
             <div className="flex-grow-1 overflow-hidden">
@@ -158,7 +177,7 @@ const KPILeads = ({ sessions: sessionsDB = [] }) => {
         </div>
       </div>
       {
-        sessions.map((session, index) => <SessionCard key={index} onModalOpen={onModalOpen} onPingModalOpen={onPingModalOpen} {...session} />)
+        sessions.map((session, index) => <SessionCard key={index} onModalOpen={onModalOpen} onPingModalOpen={onPingModalOpen} onWhatsAppModalOpen={onWhatsAppModalOpen} {...session} />)
       }
     </main>
     <Modal modalRef={modalRef} title={`Agregar cuenta${accountType ? ` - ${accountType}` : ''}`} hideFooter={!accountType} onSubmit={onModalSubmit}>
@@ -274,6 +293,17 @@ const KPILeads = ({ sessions: sessionsDB = [] }) => {
         <InputFormGroup eRef={sessionWhatsAppToRef} label='Para:' type='tel' />
       </div>
     </Modal>
+
+    <WhatsAppModal modalRef={whatsAppModalRef} dataLoaded={sessionLoaded} onReady={async data => {
+      const result = sessionsRest.save(data)
+      if (!result) return
+      setSessions(old => {
+        return old.map(x => {
+          if (x.id == result.id) return result
+          return x
+        })
+      })
+    }} />
   </>
 };
 

@@ -51,7 +51,7 @@ class SessionController extends BasicController
 
         $mail->smtpClose();
       } else {
-        $res = new Fetch(env('WA_URL') . '/api/session/ping/' . $session->id);
+        $res = new Fetch(env('WA_URL') . '/api/session/ping/' . env('APP_CORRELATIVE') . '-' . $session->id);
         $data = $res->json();
         if (!$res->ok) throw new Exception($data['message'] ?? 'No se pudo verificar la sesión');
       }
@@ -66,30 +66,46 @@ class SessionController extends BasicController
       $from = $request->input('from');
       $to = $request->input('to');
 
-      if ($from && $to) {
+      if (!$from || !$to) throw new Exception('Envie todos los campos necesarios');
+
+      $session = Session::find($from);
+
+      if (!$session) throw new Exception('La sesion que intentas usar no existe');
+
+      if ($session->type == 'Email') {
         $mail = new PHPMailer(true);
-        $session = Session::find($from);
+        $mail->isSMTP();
+        $mail->Host       = $session->metadata['type'] == 'gmail' ? $this->gmailHost : $session->metadata['host'];
+        $mail->SMTPAuth   = true;
+        $mail->Username   = $session->metadata['email'];
+        $mail->Password   = $session->metadata['password'];
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port       = $session->metadata['type'] == 'gmail' ? $this->gmailPort : $session->metadata['port'];
 
-        if ($session && $session->metadata['type'] == 'Email') {
-          $mail->isSMTP();
-          $mail->Host       = $session->metadata['type'] == 'gmail' ? $this->gmailHost : $session->metadata['host'];
-          $mail->SMTPAuth   = true;
-          $mail->Username   = $session->metadata['email'];
-          $mail->Password   = $session->metadata['password'];
-          $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-          $mail->Port       = $session->metadata['type'] == 'gmail' ? $this->gmailPort : $session->metadata['port'];
+        $mail->setFrom($session->metadata['email']);
+        $mail->addAddress($to);
+        $mail->Subject = env('APP_NAME') . ' - Ping';
+        $mail->Body    = 'Pong';
 
-          $mail->setFrom($session->metadata['email']);
-          $mail->addAddress($to);
-          $mail->Subject = \env('APP_NAME') . ' - Ping';
-          $mail->Body    = 'Pong';
-
-          try {
-            $mail->send();
-          } catch (Exception $e) {
-            throw new Exception('Error al enviar el correo: ' . $mail->ErrorInfo);
-          }
+        try {
+          $mail->send();
+        } catch (Exception $e) {
+          throw new Exception('Error al enviar el correo: ' . $mail->ErrorInfo);
         }
+      } else {
+        $res = new Fetch(env('WA_URL') . '/api/send', [
+          'method' => 'POST',
+          'headers' => [
+            'Content-Type' => 'application/json'
+          ],
+          'body' => [
+            'from' => \env('APP_CORRELATIVE') . '-' . $session->id,
+            'to' => [$to],
+            'content' => 'Ping'
+          ]
+        ]);
+        $data = $res->json();
+        if (!$res->ok) throw new Exception($data['message'] ?? 'Ocurrio un error al enviar el ping');
       }
     });
 

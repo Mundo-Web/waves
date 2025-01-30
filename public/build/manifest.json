@@ -503,13 +503,13 @@
     ]
   },
   "resources/js/Sessions.jsx": {
-    "file": "assets/Sessions-DKEnEOsQ.js",
+    "file": "assets/Sessions-C1svIkOr.js",
     "name": "Sessions",
     "src": "resources/js/Sessions.jsx",
     "isEntry": true,
     "imports": [
-      "_CreateReactScript-CVY3HzKt.js",
       "_Adminto-3c-f_6jB.js",
+      "_CreateReactScript-CVY3HzKt.js",
       "_Modal-CBdtmnYV.js",
       "_InputFormGroup-CgbdyySZ.js",
       "_TextareaFormGroup-prMXhYrp.js",

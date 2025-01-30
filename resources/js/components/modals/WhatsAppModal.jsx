@@ -4,25 +4,27 @@ import '../../../css/qr-code.css'
 import Swal from "sweetalert2";
 import Tippy from "@tippyjs/react";
 import { Notify } from "sode-extend-react";
+import Global from "../../Utils/Global";
 
-const WhatsAppModal = ({ status: whatsappStatus, setStatus, WA_URL, APP_URL, session }) => {
+const WhatsAppModal = ({ modalRef, dataLoaded, onReady }) => {
   const qrRef = useRef()
   const phoneRef = useRef()
 
-  const { color, icon, text } = WhatsAppStatuses[whatsappStatus]
+  const [status, setStatus] = useState('verifying')
+  const { color, icon, text } = WhatsAppStatuses[status]
   const [percent, setPercent] = useState(0)
   const [sessionInfo, setSessionInfo] = useState({})
 
-  const businessSession = `atalaya-${session.business_uuid}`
+  const businessSession = `${Global.APP_CORRELATIVE}-${dataLoaded?.id}`
 
   useEffect(() => {
-    if (whatsappStatus == 'verifying') {
+    if (!dataLoaded) return
+    if (status == 'verifying') {
       const searchParams = new URLSearchParams({
-        session: businessSession,
-        redirect_to: `${APP_URL}/free/leads`
+        session: businessSession
       })
 
-      let eventSource = new EventSource(`${WA_URL}/api/session/verify?${searchParams}`)
+      let eventSource = new EventSource(`${Global.WA_URL}/api/session/verify?${searchParams}`)
       eventSource.onmessage = ({ data }) => {
         if (data == 'ping') return console.log('Realtime active')
         const { status, qr, percent, info } = JSON.parse(data)
@@ -47,6 +49,14 @@ const WhatsAppModal = ({ status: whatsappStatus, setStatus, WA_URL, APP_URL, ses
           case 'ready':
             setStatus('ready')
             setSessionInfo(info)
+            onReady({
+              id: dataLoaded.id,
+              metadata: {
+                name: info.pushname,
+                email: info.me._serialized,
+                phone: info.me.user
+              }
+            })
             eventSource.close()
             break
           case 'close':
@@ -70,7 +80,7 @@ const WhatsAppModal = ({ status: whatsappStatus, setStatus, WA_URL, APP_URL, ses
         }, 5000)
       }
     }
-  }, [whatsappStatus])
+  }, [status, dataLoaded])
 
   const onCloseClicked = async () => {
     const { isConfirmed } = await Swal.fire({
@@ -82,7 +92,7 @@ const WhatsAppModal = ({ status: whatsappStatus, setStatus, WA_URL, APP_URL, ses
       cancelButtonText: `Cancelar`
     })
     if (!isConfirmed) return
-    await fetch(`${WA_URL}/api/session/${businessSession}`, {
+    await fetch(`${Global.WA_URL}/api/session/${businessSession}`, {
       method: 'DELETE'
     })
     Notify.add({
@@ -94,61 +104,24 @@ const WhatsAppModal = ({ status: whatsappStatus, setStatus, WA_URL, APP_URL, ses
     setStatus('verifying')
   }
 
-  const onPingClicked = async () => {
-    try {
-      const res = await fetch(`${WA_URL}/api/send`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          from: businessSession,
-          to: [phoneRef.current.value],
-          content: 'Ping!\n> Mensaje automatico',
-        })
-      })
-
-      if (!res.ok) throw new Error('No se pudo enviar el ping');
-
-      Notify.add({
-        icon: '/assets/img/logo-login.svg',
-        title: 'Operacion correcta',
-        body: `Se envio el ping a ${phoneRef.current.value}`
-      })
-    } catch (error) {
-      Notify.add({
-        icon: '/assets/img/logo-login.svg',
-        title: 'Error',
-        body: error.message,
-        type: 'danger'
-      })
-    }
-  }
-
-  return (<div id="whatsapp-modal" className="modal fade" aria-hidden="true" data-bs-backdrop='static' >
+  return (<div ref={modalRef} className="modal fade" aria-hidden="true" data-bs-backdrop='static' >
     <div className="modal-dialog modal-sm modal-dialog-centered">
       <div className="modal-content">
         <div className="modal-body">
           <div className="text-center">
             <button type='button' className='btn-close position-absolute top-0 end-0 me-2 mt-2' data-bs-dismiss='modal' aria-label='Close'></button>
             <i className={`${icon} h1 text-${color} my-2 d-block`}></i>
-            <h4 className="mt-2">{text} {whatsappStatus == 'loading_screen' && `[${percent}%]`}</h4>
-            <div ref={qrRef} id="qr-code" className={`mt-3 text-center ${whatsappStatus == 'qr' ? 'd-block' : 'd-none'}`}>
+            <h4 className="mt-2">{text} {status == 'loading_screen' && `[${percent}%]`}</h4>
+            <div ref={qrRef} id="qr-code" className={`mt-3 text-center ${status == 'qr' ? 'd-block' : 'd-none'}`}>
             </div>
             {
-              whatsappStatus == 'ready' && <div className="d-block py-2">
+              status == 'ready' && <div className="d-block py-2">
                 <b>{sessionInfo?.pushname}</b>
                 <br />
                 <span className="text-muted">{sessionInfo?.me?.user}@{sessionInfo?.me?.server}</span>
-                <div className="input-group mt-2">
-                  <input ref={phoneRef} type="text" className="form-control form-control-sm" placeholder="Numero receptor" />
-                  <Tippy content="Enviar mensaje ping">
-                    <button className="btn btn-sm input-group-text btn-dark waves-effect waves-light" type="button" onClick={onPingClicked}>Ping</button>
-                  </Tippy>
-                </div>
               </div>
             }
-            {whatsappStatus == 'ready' && <button type="button" className="btn btn-danger my-2" onClick={onCloseClicked}>Cerrar sesion</button>}
+            {status == 'ready' && <button type="button" className="btn btn-danger my-2" onClick={onCloseClicked}>Cerrar sesion</button>}
           </div>
         </div>
       </div>

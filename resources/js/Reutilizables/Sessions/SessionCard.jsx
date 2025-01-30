@@ -1,11 +1,10 @@
 import Tippy from "@tippyjs/react"
 import React, { useEffect, useState } from "react"
-import { Fetch } from "sode-extend-react";
 import SessionsRest from "../../actions/SessionsRest";
 
 const sessionsRest = new SessionsRest()
 
-const SessionCard = ({ onModalOpen, onPingModalOpen, ...session }) => {
+const SessionCard = ({ onModalOpen, onPingModalOpen, onWhatsAppModalOpen, ...session }) => {
 
   const [isActive, setIsActive] = useState(null)
 
@@ -19,11 +18,13 @@ const SessionCard = ({ onModalOpen, onPingModalOpen, ...session }) => {
     setIsActive(verification)
   }
 
-  return <div className="card">
-    <div className="card-body widget-user">
+  return <div className="card mb-0">
+    <div className="card-body widget-user" style={{
+      width: '240px'
+    }}>
       <div className="d-flex align-items-center">
         <div className="flex-grow-1 overflow-hidden">
-          <h5 className="my-0">
+          <h5 className="mt-0 mb-1 text-truncate">
             {
               isActive == null
                 ? <i className={`mdi mdi-circle me-1 text-muted`}></i>
@@ -48,6 +49,13 @@ const SessionCard = ({ onModalOpen, onPingModalOpen, ...session }) => {
               isActive && <Tippy content='Ping'>
                 <button className='btn btn-xs btn-dark rounded-pill waves-effect' onClick={() => onPingModalOpen(session)}>
                   <i className='mdi mdi-signal-variant'></i>
+                </button>
+              </Tippy>
+            }
+            {
+              (session.type == 'WhatsApp' && !isActive) && <Tippy content='Escanear QR'>
+                <button className='btn btn-xs btn-dark rounded-pill waves-effect' onClick={() => onWhatsAppModalOpen(session)}>
+                  <i className='mdi mdi-qrcode-scan'></i>
                 </button>
               </Tippy>
             }
