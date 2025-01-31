@@ -215,20 +215,20 @@ const KPILeads = ({ sessions: sessionsDB = [] }) => {
         <div hidden={accountType != 'Email'}>
           <ul id='email-types' className="nav nav-pills navtab-bg nav-justified">
             <li className="nav-item">
-              <a href="#email-integration" data-bs-toggle="tab" aria-expanded="false" className={`nav-link ${emailType == null || emailType == 'integration' ? 'active' : ''}`} >
+              <a href="#email-integration" data-bs-toggle="tab" aria-expanded="false" className={`nav-link ${emailType == null || emailType == 'integration' ? 'active' : ''}`} onClick={() => setEmailType('integration')}>
                 <i className='mdi mdi-email me-1'></i>
                 Integracion
               </a>
             </li>
             <li className="nav-item">
-              <a href="#email-gmail" data-bs-toggle="tab" aria-expanded="true" className={`nav-link ${emailType == 'gmail' ? 'active' : ''}`}>
+              <a href="#email-gmail" data-bs-toggle="tab" aria-expanded="true" className={`nav-link ${emailType == 'gmail' ? 'active' : ''}`} onClick={() => setEmailType('gmail')}>
                 <i className='mdi mdi-gmail me-1'></i>
                 Gmail
               </a>
             </li>
             <Tippy content="Proximamente">
               <li className="nav-item">
-                <a href="#email-google" data-bs-toggle="tab" aria-expanded="false" className={`nav-link ${emailType == 'google' ? 'active' : ''} disabled`} >
+                <a href="#email-google" data-bs-toggle="tab" aria-expanded="false" className={`nav-link ${emailType == 'google' ? 'active' : ''} disabled`} onClick={() => setEmailType('google')}>
                   <i className='mdi mdi-google me-1'></i>
                   Google
                 </a>
