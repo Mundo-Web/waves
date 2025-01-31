@@ -59,8 +59,12 @@
     }
 
     body code,
-    body pre {
-      font-family: monospace;
+    body pre,
+    body .CodeMirror-code span[role="presentation"],
+    body .CodeMirror-code span[role="presentation"] .cm-tag,
+    body .CodeMirror-code span[role="presentation"] .cm-attribute,
+    body .CodeMirror-code span[role="presentation"] .cm-string {
+      font-family: monospace !important;
     }
 
     .show-button-child button,

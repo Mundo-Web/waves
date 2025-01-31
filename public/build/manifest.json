@@ -82,6 +82,14 @@
       "_server.browser-BDv8EdO-.js"
     ]
   },
+  "_Editor-oElHw87E.js": {
+    "file": "assets/Editor-oElHw87E.js",
+    "name": "Editor",
+    "imports": [
+      "_CreateReactScript-CVY3HzKt.js",
+      "_index-DE8gkn8h.js"
+    ]
+  },
   "_InputFormGroup-CgbdyySZ.js": {
     "file": "assets/InputFormGroup-CgbdyySZ.js",
     "name": "InputFormGroup",
@@ -525,7 +533,7 @@
     ]
   },
   "resources/js/Settings.jsx": {
-    "file": "assets/Settings-MfEJ8qfm.js",
+    "file": "assets/Settings-D8chCwUr.js",
     "name": "Settings",
     "src": "resources/js/Settings.jsx",
     "isEntry": true,
@@ -535,8 +543,9 @@
       "_Modal-CBdtmnYV.js",
       "_QuillFormGroup-Byk8gSEN.js",
       "_SelectFormGroup-dxUp-DLT.js",
-      "_index-DE8gkn8h.js",
-      "_TextareaFormGroup-prMXhYrp.js"
+      "_Editor-oElHw87E.js",
+      "_TextareaFormGroup-prMXhYrp.js",
+      "_index-DE8gkn8h.js"
     ],
     "css": [
       "assets/Settings-36rm-KiB.css",
@@ -596,7 +605,7 @@
     ]
   },
   "resources/js/Templates.jsx": {
-    "file": "assets/Templates-6UvKgfat.js",
+    "file": "assets/Templates-BTrXxkKG.js",
     "name": "Templates",
     "src": "resources/js/Templates.jsx",
     "isEntry": true,
@@ -612,7 +621,9 @@
       "_TextareaFormGroup-prMXhYrp.js",
       "_TippyButton-CnFim1Gl.js",
       "_SelectFormGroup-dxUp-DLT.js",
-      "_server.browser-BDv8EdO-.js"
+      "_Editor-oElHw87E.js",
+      "_server.browser-BDv8EdO-.js",
+      "_index-DE8gkn8h.js"
     ]
   },
   "resources/js/Types.jsx": {

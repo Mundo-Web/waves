@@ -4,15 +4,16 @@ const EditorFormGroup = ({
   col,
   label,
   eRef,
+  editorRef: codeEditorRef,
   placeholder,
   required = false,
-  rows = 3,
+  rows = 6,
   value = '',
   onChange = () => { }
 }) => {
   const [editorValue, setEditorValue] = useState(value);
   const localRef = useRef();
-  const editorInstance = useRef(null);
+  const editorInstance = codeEditorRef || useRef();
 
   const editorRef = eRef || localRef;
 
@@ -26,8 +27,11 @@ const EditorFormGroup = ({
       mode: "htmlmixed",
       theme: "sode",
       indentUnit: 2,
-      tabSize: 2
+      tabSize: 2,
+      lineNumbers: true,
     });
+
+    editorInstance.current.setSize(null, 600);
 
     editorInstance.current.setValue(value);
 

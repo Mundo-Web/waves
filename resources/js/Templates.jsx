@@ -1,5 +1,5 @@
 
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import CreateReactScript from './Utils/CreateReactScript.jsx'
 import ReactAppend from './Utils/ReactAppend.jsx'
@@ -8,9 +8,6 @@ import RolesRest from './actions/RolesRest.js'
 import Adminto from './components/Adminto.jsx'
 import Modal from './components/Modal.jsx'
 import Table from './components/Table.jsx'
-import Accordion from './components/accordion/Accordion.jsx'
-import AccordionCard from './components/accordion/AccordionCard.jsx'
-import CheckboxFormGroup from './components/form/CheckboxFormGroup.jsx'
 import InputFormGroup from './components/form/InputFormGroup.jsx'
 import TextareaFormGroup from './components/form/TextareaFormGroup.jsx'
 import TippyButton from './components/form/TippyButton.jsx'
@@ -19,25 +16,17 @@ import Swal from 'sweetalert2'
 import TemplatesRest from './actions/TemplatesRest.js'
 import SelectFormGroup from './components/form/SelectFormGroup.jsx'
 import EditorFormGroup from './components/form/EditorFormGroup.jsx'
+import { Editor } from '@tinymce/tinymce-react'
 
 const templatesRest = new TemplatesRest()
 
-const Templates = ({ permissions = [], can }) => {
-  permissions = Object.values(permissions.map((x) => {
-    const [origin] = x.name.split('.')
-    return { ...x, origin }
-  }).reduce((acc, item) => {
-    if (!acc[item.origin]) {
-      acc[item.origin] = [];
-    }
-    acc[item.origin].push(item);
-    return acc;
-  }, {}))
+const Templates = ({ }) => {
 
   const gridRef = useRef()
   const modalRef = useRef()
   const designModalRef = useRef()
-  const permissionsRef = useRef()
+  const editorRef = useRef()
+  const codeEditorRef = useRef()
   // const buttonPermissionsRef = useRef()
 
   // Form elements ref
@@ -48,6 +37,7 @@ const Templates = ({ permissions = [], can }) => {
 
   const [isEditing, setIsEditing] = useState(false)
   const [templateActive, setTemplateActive] = useState({})
+  const [templateContent, setTemplateContent] = useState('')
 
   const onModalOpen = (data) => {
     if (data?.id) setIsEditing(true)
@@ -63,9 +53,8 @@ const Templates = ({ permissions = [], can }) => {
 
   const onEditorModalOpen = async (data) => {
     const result = await templatesRest.get(data.id)
-    console.log(result)
     setTemplateActive(result);
-
+    setTemplateContent(result.content ?? '')
     $(designModalRef.current).modal('show')
   }
 
@@ -119,6 +108,11 @@ const Templates = ({ permissions = [], can }) => {
     $(gridRef.current).dxDataGrid('instance').refresh()
   }
 
+  useEffect(() => {
+    setTemplateContent(templateActive?.content ?? '')
+    console.log(codeEditorRef)
+  }, [templateActive])
+
   return (<>
     <Table gridRef={gridRef} title='Plantillas' rest={templatesRest}
       toolBar={(container) => {
@@ -129,7 +123,7 @@ const Templates = ({ permissions = [], can }) => {
           icon: 'fas fa-undo-alt',
           onClick: () => $(gridRef.current).dxDataGrid('instance').refresh()
         }))
-        can('roles', 'all', 'create') && container.unshift(DxPanelButton({
+        container.unshift(DxPanelButton({
           className: 'btn btn-xs btn-soft-primary',
           text: 'Nuevo',
           title: 'Agregar registro',
@@ -187,7 +181,7 @@ const Templates = ({ permissions = [], can }) => {
           <option value="Email">Email</option>
           <option value="WhatsApp">WhatsApp</option>
         </SelectFormGroup>
-        <InputFormGroup eRef={nameRef} label='Rol' required />
+        <InputFormGroup eRef={nameRef} label='Nombre' required />
         <TextareaFormGroup eRef={descriptionRef} label='Descripcion' />
       </div>
     </Modal>
@@ -217,33 +211,47 @@ const Templates = ({ permissions = [], can }) => {
       </ul>
       <div className="tab-content">
         <div className="tab-pane active" id="wysiwyg-editor">
-          <p>Vakal text here dolor sit amet, consectetuer adipiscing elit. Aenean
-            commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et
-            magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis,
-            ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa
-            quis enim.</p>
-          <p className="mb-0">Donec pede justo, fringilla vel, aliquet nec, vulputate
-            eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae,
-            justo. Nullam dictum felis eu pede mollis pretium. Integer
-            tincidunt.Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate
-            eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae,
-            eleifend ac, enim.</p>
+          <Editor
+            ref={editorRef}
+            apiKey='to9eekrwr7478kpu5s95npp08yehwdh1o52wuuuo5n2msy8m'
+            init={{
+              plugins: [
+                'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'image', 'link', 'lists', 'media', 'searchreplace', 'table', 'visualblocks', 'wordcount',
+              ],
+              toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
+              tinycomments_mode: 'embedded',
+              tinycomments_author: 'Author name',
+              mergetags_list: [
+                { value: 'First.Name', title: 'First Name' },
+                { value: 'Email', title: 'Email' },
+              ],
+              ai_request: (request, respondWith) => respondWith.string(() => Promise.reject('See docs to implement AI Assistant')),
+              height: '600px',
+            }}
+            value={templateContent}
+            onEditorChange={(newValue) => setTemplateContent(newValue)}
+          />
+          <div className='mb-2'></div>
         </div>
         <div className="tab-pane" id="code-editor">
-          <EditorFormGroup />
+          <EditorFormGroup editorRef={codeEditorRef} onChange={e => setTemplateContent(e.target.value)} />
         </div>
         <div className="tab-pane" id="dropzone">
-          <p>Vakal text here dolor sit amet, consectetuer adipiscing elit. Aenean
-            commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et
-            magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis,
-            ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa
-            quis enim.</p>
-          <p className="mb-0">Donec pede justo, fringilla vel, aliquet nec, vulputate
-            eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae,
-            justo. Nullam dictum felis eu pede mollis pretium. Integer
-            tincidunt.Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate
-            eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae,
-            eleifend ac, enim.</p>
+          <div className='d-flex align-items-center justify-content-center mb-2 border' style={{
+            height: '600px',
+            borderRadius: '10px'
+          }}>
+            <div>
+              <input className='d-none' id='dropzone-file' type="file" accept='text/html,text/plain' />
+              <button className='d-block mx-auto mb-2 btn btn-sm btn-white rounded-pill waves-effect'>
+                <i className='mdi mdi-paperclip me-1'></i>
+                Seleccionar archivo
+              </button>
+              <label className='d-block' htmlFor="dropzone-file" style={{ cursor: 'pointer' }}>
+                Arrastra y suelta tu plantilla aquí, o haz clic para seleccionar tu archivo HTML.
+              </label>
+            </div>
+          </div>
         </div>
       </div>
     </Modal>
