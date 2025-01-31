@@ -111,6 +111,7 @@ const Menu = ({ session, can, presets, APP_PROTOCOL, APP_DOMAIN, leadsCount, tas
 
           <MenuItem href="/home" icon='mdi mdi-home'>Inicio</MenuItem>
           <MenuItem href="/sessions" icon='mdi mdi-vector-triangle'>Cuentas</MenuItem>
+          <MenuItem href="/templates" icon='mdi mdi-page-layout-header-footer'>Plantillas</MenuItem>
 
           {
             (can('users', 'root', 'all', 'list') || can('roles', 'root', 'all', 'list') || can('permissions', 'root', 'all', 'list')) &&

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Session extends Model
+class Template extends Model
 {
     use HasFactory, HasUuids;
 
@@ -16,15 +16,14 @@ class Session extends Model
     protected $fillable = [
         'name',
         'description',
-        'alias',
         'type',
-        'token',
-        'metadata',
+        'content',
+        'vars',
         'business_id',
-        'status'
+        'status',
     ];
 
     protected $casts = [
-        'metadata' => 'array',
+        'vars' => 'array',
     ];
 }

@@ -12,14 +12,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('sessions', function (Blueprint $table) {
+        Schema::create('templates', function (Blueprint $table) {
             $table->uuid('id')->default(DB::raw('(UUID())'))->primary();
             $table->string('name');
             $table->longText('description')->nullable();
-            $table->string('alias')->nullable();
-            $table->string('type')->default('email');
-            $table->char('token', 36)->default(DB::raw('(UUID())'))->nullable();
-            $table->json('metadata')->nullable();
+            $table->string('type')->default('Email');
+            $table->longText('content')->nullable();
+            $table->json('vars')->nullable();
 
             $table->unsignedBigInteger('business_id');
             $table->boolean('status')->nullable()->default(true);
@@ -32,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('sessions');
+        Schema::dropIfExists('templates');
     }
 };

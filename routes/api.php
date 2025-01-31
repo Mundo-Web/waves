@@ -25,6 +25,7 @@ use App\Http\Controllers\StatusController;
 use App\Http\Controllers\SubdomainController;
 use App\Http\Controllers\TableController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\TemplateController;
 use App\Http\Controllers\TypeController;
 use App\Http\Controllers\UserByProjectController;
 use App\Http\Controllers\UserController;
@@ -60,13 +61,20 @@ Route::middleware('auth')->group(function () {
     Route::post('/users/sign', [UserController::class, 'addSign']);
     Route::delete('/users/sign', [UserController::class, 'deleteSign']);
 
-    // Users routes
+    // Sessions Routes
     Route::get('/sessions/{id}', [SessionController::class, 'verify']);
     Route::post('/sessions/ping', [SessionController::class, 'ping']);
     Route::post('/sessions', [SessionController::class, 'save']);
     Route::post('/sessions/paginate', [SessionController::class, 'paginate']);
     Route::patch('/sessions/status', [SessionController::class, 'status']);
     Route::delete('/sessions/{id}', [SessionController::class, 'delete']);
+
+    // Templates Routes
+    Route::get('/templates/{id}', [TemplateController::class, 'get']);
+    Route::post('/templates', [TemplateController::class, 'save']);
+    Route::post('/templates/paginate', [TemplateController::class, 'paginate']);
+    Route::patch('/templates/status', [TemplateController::class, 'status']);
+    Route::delete('/templates/{id}', [TemplateController::class, 'delete']);
 
     // Users routes
     Route::post('/users', [UserController::class, 'save']);

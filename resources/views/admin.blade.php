@@ -29,6 +29,12 @@
   <link href="/lte/assets/libs/dxdatagrid/css/dx.dark.compact.css?v=06d3ebc8-645c-4d80-a600-c9652743c426"
     rel="stylesheet" type="text/css" id="dg-dark-stylesheet" disabled="disabled" />
 
+
+  @if ($route == 'Templates.jsx')
+    <link rel="stylesheet" href="/lte/assets/libs/codemirror/codemirror.min.css">
+    <link rel="stylesheet" href="/lte/assets/libs/codemirror/themes/sode.css">
+  @endif
+
   {{-- Bootstrap Styles --}}
   <link href="/lte/assets/css/config/default/bootstrap.min.css" rel="stylesheet" type="text/css"
     id="bs-default-stylesheet" />
@@ -129,7 +135,16 @@
     <script src="/lte/assets/libs/fullcalendar/main.min.js"></script>
   @elseif ($route == 'Leads.jsx')
     <script src="/lte/assets/libs/jquery-ui/jquery-ui.min.js"></script>
+  @elseif ($route == 'Templates.jsx')
+    <script src="/lte/assets/libs/jquery-ui/jquery-ui.min.js"></script>
+    <script src="/lte/assets/libs/codemirror/codemirror.min.js"></script>
+    <script src="/lte/assets/libs/codemirror/beautify-html.min.js"></script>
+    <script src="/lte/assets/libs/codemirror/mode/xml/xml.min.js"></script>
+    <script src="/lte/assets/libs/codemirror/mode/javascript/javascript.min.js"></script>
+    <script src="/lte/assets/libs/codemirror/mode/css/css.min.js"></script>
+    <script src="/lte/assets/libs/codemirror/mode/htmlmixed/htmlmixed.min.js"></script>
   @endif
+
   <script src="/lte/assets/libs/quill/quill.min.js"></script>
   <script src="/lte/assets/libs/quill/quill.mention.min.js"></script>
   <script src="/lte/assets/libs/select2/js/select2.full.min.js"></script>
@@ -148,7 +163,7 @@
       const modal = event.target;
       const backdrop = document.querySelector('.modal-backdrop:not([data-modal-id])');
       if (backdrop) {
-        backdrop.style.zIndex = window.getComputedStyle(modal).zIndex -1
+        backdrop.style.zIndex = window.getComputedStyle(modal).zIndex - 1
         backdrop.setAttribute('data-modal-id', modal.id);
       }
     });

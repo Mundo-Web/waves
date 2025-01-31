@@ -6,6 +6,22 @@ class BasicRest {
   path = null
   hasFiles = false
 
+  get = async (id) => {
+    try {
+      const { status, result } = await Fetch(`/api/${this.path}/${id}`)
+      if (!status) throw new Error(result?.message || 'Ocurrio un error inesperado')
+      return result.data
+    } catch (error) {
+      Notify.add({
+        icon: '/assets/img/favicon.png',
+        title: 'Error',
+        body: error.message,
+        type: 'danger'
+      })
+      return null
+    }
+  }
+
   paginate = async (params) => {
     controller.abort('Nothing')
     controller = new AbortController()

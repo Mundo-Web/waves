@@ -20,6 +20,7 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\SubdomainController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\TemplateController;
 use App\Http\Controllers\TypeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ViewController;
@@ -58,6 +59,8 @@ Route::get('/', function (Request $request) {
 Route::middleware('auth')->group(function () {
     Route::get('/home', [HomeController::class, 'reactView'])->name('Home.jsx');
     Route::get('/sessions', [SessionController::class, 'reactView'])->name('Sessions.jsx');
+    Route::get('/templates', [TemplateController::class, 'reactView'])->name('Templates.jsx');
+
     Route::get('/clients', [ClientController::class, 'reactView'])->name('Clients.jsx');
     Route::get('/tasks', [TaskController::class, 'reactView'])->name('Tasks.jsx');
     Route::get('/leads', [LeadController::class, 'reactView'])->name('Leads.jsx');
