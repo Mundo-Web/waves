@@ -189,6 +189,14 @@ class BasicController extends Controller
         });
       }
 
+      if (Schema::hasColumn((new $this->model)->getTable(), 'status')) {
+        if ($this->prefix4filter) {
+          $instance->whereNotNull("{$this->prefix4filter}.status");
+        } else {
+          $instance->whereNotNull('status');
+        }
+      }
+
       if ($request->sort != null) {
         foreach ($request->sort as $sorting) {
           // $selector = \str_replace('.', '__', $sorting['selector']);

@@ -13,7 +13,7 @@ use SoDe\Extend\Response;
 class SessionController extends BasicController
 {
   public $model = Session::class;
-  public $reactView = 'Session';
+  public $reactView = 'Sessions';
   public $gmailHost = 'smtp.gmail.com';
   public $gmailPort = 587;
 

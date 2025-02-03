@@ -25,9 +25,8 @@ const Templates = ({ }) => {
   const gridRef = useRef()
   const modalRef = useRef()
   const designModalRef = useRef()
-  const editorRef = useRef()
+
   const codeEditorRef = useRef()
-  // const buttonPermissionsRef = useRef()
 
   // Form elements ref
   const idRef = useRef()
@@ -37,7 +36,12 @@ const Templates = ({ }) => {
 
   const [isEditing, setIsEditing] = useState(false)
   const [templateActive, setTemplateActive] = useState({})
-  const [templateContent, setTemplateContent] = useState('')
+  const [typeEdition, setTypeEdition] = useState('wysiwyg')
+
+  // Content Statuses
+  const [wysiwygContent, setWysiwygContent] = useState('')
+  const [codeContent, setCodeContent] = useState('')
+  const [dropzoneContent, setDropzoneContent] = useState('')
 
   const onModalOpen = (data) => {
     if (data?.id) setIsEditing(true)
@@ -54,7 +58,8 @@ const Templates = ({ }) => {
   const onEditorModalOpen = async (data) => {
     const result = await templatesRest.get(data.id)
     setTemplateActive(result);
-    setTemplateContent(result.content ?? '')
+    setTypeEdition('wysiwyg')
+    setWysiwygContent(result?.content ?? '<i>- Agrega tu contenido aqui -</i>');
     $(designModalRef.current).modal('show')
   }
 
@@ -93,8 +98,8 @@ const Templates = ({ }) => {
 
   const onDeleteClicked = async (id) => {
     const { isConfirmed } = await Swal.fire({
-      title: 'Eliminar rol',
-      text: '¿Está seguro de eliminar este rol?',
+      title: 'Eliminar registro',
+      text: '¿Está seguro de eliminar este registro?',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
@@ -103,15 +108,35 @@ const Templates = ({ }) => {
       cancelButtonText: 'Cancelar'
     })
     if (!isConfirmed) return
-    const result = await RolesRest.delete(id)
+    const result = await templatesRest.delete(id)
     if (!result) return
     $(gridRef.current).dxDataGrid('instance').refresh()
   }
 
-  useEffect(() => {
-    setTemplateContent(templateActive?.content ?? '')
-    console.log(codeEditorRef)
-  }, [templateActive])
+  const onTypeEditionClicked = (newType) => {
+    setTypeEdition(old => {
+      if (old == 'wysiwyg' && newType == 'code') {
+        codeEditorRef.current.setValue(wysiwygContent)
+        setTimeout(() => {
+          codeEditorRef.current.refresh()
+        }, 125);
+      } else if (old == 'wysiwyg' && newType == 'dropzone') {
+        setDropzoneContent(wysiwygContent)
+      } else if (old == 'code' && newType == 'wysiwyg') {
+        setWysiwygContent(codeContent)
+      } else if (old == 'code' && newType == 'dropzone') {
+        setDropzoneContent(codeContent)
+      } else if (old == 'dropzone' && newType == 'wysiwyg') {
+        setWysiwygContent(dropzoneContent)
+      } else if (old == 'dropzone' && newType == 'code') {
+        codeEditorRef.current.setValue(dropzoneContent)
+        setTimeout(() => {
+          codeEditorRef.current.refresh()
+        }, 125);
+      }
+      return newType
+    })
+  }
 
   return (<>
     <Table gridRef={gridRef} title='Plantillas' rest={templatesRest}
@@ -185,34 +210,36 @@ const Templates = ({ }) => {
         <TextareaFormGroup eRef={descriptionRef} label='Descripcion' />
       </div>
     </Modal>
-    <Modal modalRef={designModalRef} title={`Diseñador de plantillas - ${templateActive.name}`} btnSubmitText='Guardar' onSubmit={onDesignModalSubmit} size='xl'>
+    <Modal modalRef={designModalRef} title={`Diseñador de plantillas - ${templateActive.name}`} btnSubmitText='Guardar' onSubmit={onDesignModalSubmit} size='xl' isStatic>
       <ul className="nav nav-pills navtab-bg justify-content-center flex-wrap gap-1">
         <li className="nav-item">
-          <a href="#wysiwyg-editor" data-bs-toggle="tab" aria-expanded="false" className="nav-link text-center active" style={{
+          <a href="#wysiwyg-editor" className={`nav-link text-center ${typeEdition == 'wysiwyg' ? 'active' : ''}`} style={{
             width: '200px'
-          }}>
+          }} onClick={() => onTypeEditionClicked('wysiwyg')}>
+            <i className='mdi mdi-page-layout-header-footer me-1'></i>
             Editor WYSIWYG
           </a>
         </li>
         <li className="nav-item">
-          <a href="#code-editor" data-bs-toggle="tab" aria-expanded="true" className="nav-link text-center" style={{
+          <a href="#code-editor" className={`nav-link text-center ${typeEdition == 'code' ? 'active' : ''}`} style={{
             width: '200px'
-          }}>
+          }} onClick={() => onTypeEditionClicked('code')}>
+            <i className='mdi mdi-code-tags me-1'></i>
             Editor de codigo
           </a>
         </li>
         <li className="nav-item">
-          <a href="#dropzone" data-bs-toggle="tab" aria-expanded="false" className="nav-link text-center" style={{
+          <a href="#dropzone" className={`nav-link text-center ${typeEdition == 'dropzone' ? 'active' : ''}`} style={{
             width: '200px'
-          }}>
+          }} onClick={() => onTypeEditionClicked('dropzone')}>
+            <i className='mdi mdi-cloud-upload me-1'></i>
             Carga tu archivo
           </a>
         </li>
       </ul>
       <div className="tab-content">
-        <div className="tab-pane active" id="wysiwyg-editor">
+        <div className={`tab-pane ${typeEdition == 'wysiwyg' ? 'active' : ''}`} id="wysiwyg-editor">
           <Editor
-            ref={editorRef}
             apiKey='to9eekrwr7478kpu5s95npp08yehwdh1o52wuuuo5n2msy8m'
             init={{
               plugins: [
@@ -228,26 +255,28 @@ const Templates = ({ }) => {
               ai_request: (request, respondWith) => respondWith.string(() => Promise.reject('See docs to implement AI Assistant')),
               height: '600px',
             }}
-            value={templateContent}
-            onEditorChange={(newValue) => setTemplateContent(newValue)}
+            value={wysiwygContent}
+            onEditorChange={(newValue) => setWysiwygContent(newValue)}
           />
           <div className='mb-2'></div>
         </div>
-        <div className="tab-pane" id="code-editor">
-          <EditorFormGroup editorRef={codeEditorRef} onChange={e => setTemplateContent(e.target.value)} />
+        <div className={`tab-pane ${typeEdition == 'code' ? 'active' : ''}`} id="code-editor">
+          <EditorFormGroup editorRef={codeEditorRef} onChange={e => setCodeContent(e.target.value)} />
         </div>
-        <div className="tab-pane" id="dropzone">
+        <div className={`tab-pane ${typeEdition == 'dropzone' ? 'active' : ''}`} id="dropzone">
           <div className='d-flex align-items-center justify-content-center mb-2 border' style={{
             height: '600px',
             borderRadius: '10px'
           }}>
             <div>
               <input className='d-none' id='dropzone-file' type="file" accept='text/html,text/plain' />
-              <button className='d-block mx-auto mb-2 btn btn-sm btn-white rounded-pill waves-effect'>
+              <label htmlFor="dropzone-file" className='d-block mx-auto mb-2 btn btn-sm btn-white rounded-pill waves-effect' style={{
+                width: 'max-content'
+              }}>
                 <i className='mdi mdi-paperclip me-1'></i>
                 Seleccionar archivo
-              </button>
-              <label className='d-block' htmlFor="dropzone-file" style={{ cursor: 'pointer' }}>
+              </label>
+              <label htmlFor="dropzone-file" className='d-block' style={{ cursor: 'pointer' }}>
                 Arrastra y suelta tu plantilla aquí, o haz clic para seleccionar tu archivo HTML.
               </label>
             </div>

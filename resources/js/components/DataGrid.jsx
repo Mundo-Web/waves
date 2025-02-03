@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react'
+import { Notify } from 'sode-extend-react';
 
 const DataGrid = ({ gridRef: dataGridRef, rest, columns, toolBar, masterDetail, filterValue, defaultRows, selection, allowedPageSizes = [5, 10, 25, 50, 100], pageSize = 100, exportable, exportableName, customizeCell = () => { }, reloadWith = [null] }) => {
   useEffect(() => {
@@ -10,18 +11,32 @@ const DataGrid = ({ gridRef: dataGridRef, rest, columns, toolBar, masterDetail, 
       language: "es",
       dataSource: {
         load: async (params) => {
-          const data = (await rest.paginate(params)) ?? {};
-          let newData = data?.data || [];
+          const {status, message, data, totalCount} = (await rest.paginate(params)) ?? {};
+
+          if (status != 200) {
+            Notify.add({
+              icon: '/assets/img/icon.svg',
+              title: 'Error',
+              body: message,
+              type: 'danger'
+            })
+            return {
+              data: [],
+              totalCount: 0
+            }
+          }
+
+          let newData = data || [];
 
           if (defaultRows) {
             const defaultKeys = defaultRows.map(row => Object.keys(row));
             const combinedData = newData.concat(defaultRows.filter(row => {
               return !newData.some(dataRow => defaultKeys.some(keys => keys.every(key => dataRow[key] == row[key])));
             }));
-            data.data = combinedData;
+            data = combinedData;
           }
 
-          return data;
+          return {data, totalCount};
         }
       },
       onToolbarPreparing: (e) => {

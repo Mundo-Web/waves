@@ -41,7 +41,7 @@ const EditorFormGroup = ({
 
     editorInstance.current.on("change", (editor) => {
       const newValue = editor.getValue();
-      setEditorValue(newValue);
+      setEditorValue(newValue); 
       onChange({
         target: {
           value: newValue

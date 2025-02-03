@@ -49,6 +49,7 @@ const KPILeads = ({ sessions: sessionsDB = [] }) => {
   const [sessionLoaded, setSessionLoaded] = useState(null)
 
   const onModalOpen = (data) => {
+    $('[name="session_type"]').prop('checked', true)
     setAccountType(data?.type ?? null)
 
     idRef.current.value = data?.id ?? ''
@@ -188,13 +189,13 @@ const KPILeads = ({ sessions: sessionsDB = [] }) => {
       }} >
 
         {['Email', 'WhatsApp'].map((type, index) => {
-          return <label key={index} className='d-block position-relative btn btn-light text-center' style={{
+          return <button key={index} className='d-block position-relative btn btn-light text-center' style={{
             width: '120px',
-          }}>
-            <input className='d-none position-absolute' type="radio" name="session_type" id="" value={type} style={{
+          }} onClick={e => setAccountType(e.target.value)}>
+            {/* <input className='d-none position-absolute' type="radio" name="session_type" id="" value={type} style={{
               left: '8px',
               top: '8px'
-            }} onChange={e => setAccountType(e.target.value)} />
+            }} onChange={e => setAccountType(e.target.value)} /> */}
             <img className='d-block mx-auto mb-1' src={`/assets/img/${type}.svg`} alt={type} style={{
               width: '50px',
               aspectRatio: 1,
@@ -202,7 +203,7 @@ const KPILeads = ({ sessions: sessionsDB = [] }) => {
               objectPosition: 'center'
             }} />
             <span>{type}</span>
-          </label>
+          </button>
         })}
       </div>
 
@@ -210,7 +211,7 @@ const KPILeads = ({ sessions: sessionsDB = [] }) => {
         <div className="row">
           <InputFormGroup eRef={nameRef} label='Nombre' col='col-md-8' required />
           <InputFormGroup eRef={aliasRef} label='Alias' col='col-md-4' />
-          <TextareaFormGroup eRef={descriptionRef} label='Descripcion' required />
+          <TextareaFormGroup eRef={descriptionRef} label='Descripcion' />
         </div>
         <div hidden={accountType != 'Email'}>
           <ul id='email-types' className="nav nav-pills navtab-bg nav-justified">
