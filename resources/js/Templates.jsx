@@ -240,7 +240,7 @@ const Templates = ({ }) => {
       <div className="tab-content">
         <div className={`tab-pane ${typeEdition == 'wysiwyg' ? 'active' : ''}`} id="wysiwyg-editor">
           <Editor
-            apiKey='to9eekrwr7478kpu5s95npp08yehwdh1o52wuuuo5n2msy8m'
+            apiKey='f484gu1eoy1zpp3q58sgxeoqp5ls32g4sq5b6d0xehi13sra'
             init={{
               plugins: [
                 'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'image', 'link', 'lists', 'media', 'searchreplace', 'table', 'visualblocks', 'wordcount',
