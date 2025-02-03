@@ -189,9 +189,9 @@ const KPILeads = ({ sessions: sessionsDB = [] }) => {
       }} >
 
         {['Email', 'WhatsApp'].map((type, index) => {
-          return <button key={index} className='d-block position-relative btn btn-light text-center' style={{
+          return <button key={index} className='d-block position-relative btn btn-light text-center' type='button' style={{
             width: '120px',
-          }} onClick={e => setAccountType(e.target.value)}>
+          }} onClick={e => setAccountType(type)}>
             {/* <input className='d-none position-absolute' type="radio" name="session_type" id="" value={type} style={{
               left: '8px',
               top: '8px'
