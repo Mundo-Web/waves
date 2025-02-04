@@ -20,7 +20,7 @@ import { Editor } from '@tinymce/tinymce-react'
 
 const templatesRest = new TemplatesRest()
 
-const Templates = ({ }) => {
+const Templates = ({ TINYMCE_KEY }) => {
 
   const gridRef = useRef()
   const modalRef = useRef()
@@ -240,7 +240,7 @@ const Templates = ({ }) => {
       <div className="tab-content">
         <div className={`tab-pane ${typeEdition == 'wysiwyg' ? 'active' : ''}`} id="wysiwyg-editor">
           <Editor
-            apiKey='f484gu1eoy1zpp3q58sgxeoqp5ls32g4sq5b6d0xehi13sra'
+            apiKey={TINYMCE_KEY}
             init={{
               plugins: [
                 'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'image', 'link', 'lists', 'media', 'searchreplace', 'table', 'visualblocks', 'wordcount',
