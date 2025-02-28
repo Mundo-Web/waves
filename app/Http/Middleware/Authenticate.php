@@ -42,6 +42,7 @@ class Authenticate extends Middleware
             Auth::user()->is_owner = $hasPermission->is_owner;
             Auth::user()->business_id = $hasPermission->business_id;
             Auth::user()->business_uuid = $hasPermission->business_uuid;
+
             $serviceUser = User::updateOrCreate([
                 'user_id' => Auth::user()->id,
                 'business_id' => $hasPermission->business_id
