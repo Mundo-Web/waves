@@ -22,6 +22,7 @@ return new class extends Migration
             $table->integer('completed')->default(false);
             $table->integer('failed')->default(false);
             $table->integer('total')->default(false);
+            $table->boolean('status')->nullable()->default(null);
             $table->timestamps();
         });
     }
