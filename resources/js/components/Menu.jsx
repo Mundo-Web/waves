@@ -113,7 +113,7 @@ const Menu = ({ session, can, presets, APP_PROTOCOL, APP_DOMAIN, leadsCount, tas
           <MenuItem href="/sessions" icon='mdi mdi-vector-triangle'>Cuentas</MenuItem>
           <MenuItemContainer title='Comunicaciones' icon='mdi mdi-message-settings'>
             <MenuItem href="/templates" icon='mdi mdi-page-layout-header-footer'>Plantillas</MenuItem>
-            <MenuItem href="/historial" icon='mdi mdi-history'>Historial</MenuItem>
+            <MenuItem href="/histories" icon='mdi mdi-history'>Historial</MenuItem>
           </MenuItemContainer>
           {
             (can('users', 'root', 'all', 'list') || can('roles', 'root', 'all', 'list') || can('permissions', 'root', 'all', 'list')) &&

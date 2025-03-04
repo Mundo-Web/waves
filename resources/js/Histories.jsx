@@ -4,7 +4,6 @@ import { createRoot } from 'react-dom/client'
 import CreateReactScript from './Utils/CreateReactScript.jsx'
 import ReactAppend from './Utils/ReactAppend.jsx'
 import SetSelectValue from './Utils/SetSelectValue.jsx'
-import TypesRest from './actions/TypesRest.js'
 import Adminto from './components/Adminto.jsx'
 import Modal from './components/Modal.jsx'
 import Table from './components/Table.jsx'
@@ -13,6 +12,9 @@ import SelectAPIFormGroup from './components/form/SelectAPIFormGroup.jsx'
 import TextareaFormGroup from './components/form/TextareaFormGroup.jsx'
 import TippyButton from './components/form/TippyButton.jsx'
 import DxPanelButton from './components/dx/DxPanelButton.jsx'
+import HistoriesRest from './actions/HistoriesRest.js'
+
+const historiesRest= new HistoriesRest()
 
 const Histories = () => {
   const gridRef = useRef()
@@ -48,7 +50,7 @@ const Histories = () => {
       description: descriptionRef.current.value,
     }
 
-    const result = await TypesRest.save(request)
+    const result = await historiesRest.save(request)
     if (!result) return
 
     $(gridRef.current).dxDataGrid('instance').refresh()
@@ -56,19 +58,19 @@ const Histories = () => {
   }
 
   const onStatusChange = async ({ id, status }) => {
-    const result = await TypesRest.status({ id, status })
+    const result = await historiesRest.status({ id, status })
     if (!result) return
     $(gridRef.current).dxDataGrid('instance').refresh()
   }
 
   const onDeleteClicked = async (id) => {
-    const result = await TypesRest.delete(id)
+    const result = await historiesRest.delete(id)
     if (!result) return
     $(gridRef.current).dxDataGrid('instance').refresh()
   }
 
   return (<>
-    <Table gridRef={gridRef} title='envios' rest={TypesRest}
+    <Table gridRef={gridRef} title={<h4 className='header-title my-0'>Historial de envios</h4>} rest={historiesRest}
       toolBar={(container) => {
         container.unshift(DxPanelButton({
           className: 'btn btn-xs btn-soft-dark',
@@ -92,21 +94,8 @@ const Histories = () => {
           visible: false
         },
         {
-          dataField: 'table.name',
-          caption: 'Tabla',
-          dataType: 'string'
-        },
-        {
           dataField: 'name',
-          caption: 'Tipo'
-        },
-        {
-          dataField: 'description',
-          caption: 'Descripcion',
-          cellTemplate: (container, { value }) => {
-            if (!value) ReactAppend(container, <i className='text-muted'>- Sin descripcion -</i>)
-            else ReactAppend(container, value)
-          }
+          caption: 'Plantilla'
         },
         {
           dataField: 'status',
@@ -171,4 +160,4 @@ CreateReactScript((el, properties) => {
       <Histories {...properties} />
     </Adminto>
   );
-}
+})
