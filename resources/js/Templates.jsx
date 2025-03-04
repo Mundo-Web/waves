@@ -3,8 +3,6 @@ import React, { useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import CreateReactScript from './Utils/CreateReactScript.jsx'
 import ReactAppend from './Utils/ReactAppend.jsx'
-import PermissionsRest from './actions/PermissionsRest.js'
-import RolesRest from './actions/RolesRest.js'
 import Adminto from './components/Adminto.jsx'
 import Modal from './components/Modal.jsx'
 import Table from './components/Table.jsx'
@@ -15,16 +13,22 @@ import DxPanelButton from './components/dx/DxPanelButton.jsx'
 import Swal from 'sweetalert2'
 import TemplatesRest from './actions/TemplatesRest.js'
 import SelectFormGroup from './components/form/SelectFormGroup.jsx'
+import SwitchFormGroup from './components/form/SwitchFormGroup.jsx'
 import EditorFormGroup from './components/form/EditorFormGroup.jsx'
 import { Editor } from '@tinymce/tinymce-react'
+import { Clipboard } from 'sode-extend-react'
+import { renderToString } from 'react-dom/server'
+import SendingModal from './Reutilizables/Templates/SendingModal.jsx'
 
 const templatesRest = new TemplatesRest()
 
-const Templates = ({ TINYMCE_KEY }) => {
+const Templates = ({ TINYMCE_KEY, sessions }) => {
 
   const gridRef = useRef()
   const modalRef = useRef()
   const designModalRef = useRef()
+  const sendingModalRef = useRef()
+  const ddRef = useRef()
 
   const codeEditorRef = useRef()
 
@@ -33,6 +37,8 @@ const Templates = ({ TINYMCE_KEY }) => {
   const typeRef = useRef()
   const nameRef = useRef()
   const descriptionRef = useRef()
+
+  const [dataLoaded, setDataLoaded] = useState(null)
 
   const [isEditing, setIsEditing] = useState(false)
   const [templateActive, setTemplateActive] = useState({})
@@ -70,7 +76,7 @@ const Templates = ({ TINYMCE_KEY }) => {
       id: idRef.current.value || undefined,
       type: typeRef.current.value,
       name: nameRef.current.value,
-      description: descriptionRef.current.value
+      description: descriptionRef.current.value,
     }
 
     const result = await templatesRest.save(request)
@@ -83,16 +89,23 @@ const Templates = ({ TINYMCE_KEY }) => {
   const onDesignModalSubmit = async (e) => {
     e.preventDefault()
 
-    const permissions = [...$('#permissions input:checked')].map(e => e.value)
+    const content = typeEdition == 'wysiwyg' ? wysiwygContent : typeEdition == 'code' ? codeContent : dropzoneContent
+
     const request = {
-      role_id: templateActive.id,
-      permissions: permissions
+      id: templateActive.id,
+      content,
+      vars: content.match(/{{([^}]+)}}/g)?.map(match => match.slice(2, -2)) || [],
     }
 
-    const result = await PermissionsRest.massiveByRole(request)
+    const result = await templatesRest.save(request)
     if (!result) return
 
     $(designModalRef.current).modal('hide')
+  }
+
+  const onStatusChange = async ({ id, status }) => {
+    const result = await templatesRest.status({ id, status })
+    if (!result) return
     $(gridRef.current).dxDataGrid('instance').refresh()
   }
 
@@ -116,7 +129,12 @@ const Templates = ({ TINYMCE_KEY }) => {
   const onTypeEditionClicked = (newType) => {
     setTypeEdition(old => {
       if (old == 'wysiwyg' && newType == 'code') {
-        codeEditorRef.current.setValue(wysiwygContent)
+        codeEditorRef.current.setValue(html_beautify(wysiwygContent, {
+          indent_empty_lines: true,
+          preserve_newlines: true,
+          max_preserve_newlines: 1,
+          indent_size: 2
+        }))
         setTimeout(() => {
           codeEditorRef.current.refresh()
         }, 125);
@@ -129,7 +147,12 @@ const Templates = ({ TINYMCE_KEY }) => {
       } else if (old == 'dropzone' && newType == 'wysiwyg') {
         setWysiwygContent(dropzoneContent)
       } else if (old == 'dropzone' && newType == 'code') {
-        codeEditorRef.current.setValue(dropzoneContent)
+        codeEditorRef.current.setValue(html_beautify(dropzoneContent, {
+          indent_empty_lines: true,
+          preserve_newlines: true,
+          max_preserve_newlines: 1,
+          indent_size: 2
+        }))
         setTimeout(() => {
           codeEditorRef.current.refresh()
         }, 125);
@@ -137,6 +160,34 @@ const Templates = ({ TINYMCE_KEY }) => {
       return newType
     })
   }
+
+  const onDropzoneChange = (file) => {
+    file.text().then(content => {
+      const container = $(`<body>`).html(content)
+
+      container.find('style').remove()
+      container.find('script').remove()
+      container.find('meta').remove()
+      container.find('title').remove()
+      container.find('link').remove()
+
+      setDropzoneContent(container.html().trim())
+    })
+  }
+
+  const onSendingModalClicked = async (data) => {
+    const result = await templatesRest.get(data.id)
+    setDataLoaded(result)
+  }
+
+  useEffect(() => {
+    Clipboard.paste(ddRef.current, (files) => {
+      if (!files || files?.length == 0) return
+      const file = files[0]
+      if (!file.type.startsWith('text/')) return
+      onDropzoneChange(files[0])
+    })
+  }, [null])
 
   return (<>
     <Table gridRef={gridRef} title='Plantillas' rest={templatesRest}
@@ -159,39 +210,44 @@ const Templates = ({ TINYMCE_KEY }) => {
       columns={[
         {
           dataField: 'name',
-          caption: 'Nombre'
+          caption: 'Nombre',
+          cellTemplate: (container, { data }) => {
+            container.html(renderToString(<b>{data.name}</b>))
+          }
         },
         {
           dataField: 'description',
           caption: 'Descripcion'
         },
         {
-          dataField: 'type',
-          caption: 'Tipo',
-        },
-        {
-          dataField: 'updated_at',
-          caption: 'Fecha actualizacion',
-          dataType: 'date',
+          dataField: 'status',
+          caption: 'Estado',
+          dataType: 'boolean',
+          width: '120px',
           cellTemplate: (container, { data }) => {
-            container.text(moment(data.updated_at).format('LL'))
-          }
+            ReactAppend(container, <SwitchFormGroup checked={data.status} onChange={(e) => onStatusChange({ id: data.id, status: !e.target.checked })} />)
+          },
         },
         {
           caption: 'Acciones',
+          width: '180px',
           cellTemplate: (container, { data }) => {
             container.attr('style', 'display: flex; gap: 4px; overflow: unset')
 
             ReactAppend(container, <TippyButton className='btn btn-xs btn-soft-primary' title='Editar' onClick={() => onModalOpen(data)}>
-              <i className='fa fa-pen'></i>
+              <i className='mdi mdi-pencil'></i>
             </TippyButton>)
 
             ReactAppend(container, <TippyButton className='btn btn-xs btn-soft-dark' title='Diseñar plantilla' onClick={() => onEditorModalOpen(data)} data-loading-text='<i className="fa fa-spinner fa-spin"></i>'>
-              <i className='far fa-edit'></i>
+              <i className='mdi mdi-circle-edit-outline'></i>
+            </TippyButton>)
+
+            ReactAppend(container, <TippyButton className='btn btn-xs btn-white' title='Enviar mensajes masivos' onClick={() => onSendingModalClicked(data)}>
+              <i className='mdi mdi-email-send'></i>
             </TippyButton>)
 
             ReactAppend(container, <TippyButton className='btn btn-xs btn-soft-danger' title='Eliminar' onClick={() => onDeleteClicked(data.id)}>
-              <i className='fa fa-trash-alt'></i>
+              <i className='mdi mdi-delete'></i>
             </TippyButton>)
           },
           allowFiltering: false,
@@ -264,12 +320,19 @@ const Templates = ({ TINYMCE_KEY }) => {
           <EditorFormGroup editorRef={codeEditorRef} onChange={e => setCodeContent(e.target.value)} />
         </div>
         <div className={`tab-pane ${typeEdition == 'dropzone' ? 'active' : ''}`} id="dropzone">
-          <div className='d-flex align-items-center justify-content-center mb-2 border' style={{
+          <div ref={ddRef} className='d-flex align-items-center justify-content-center mb-2 border' style={{
             height: '600px',
             borderRadius: '10px'
           }}>
             <div>
-              <input className='d-none' id='dropzone-file' type="file" accept='text/html,text/plain' />
+
+              <input className='d-none' id='dropzone-file' type="file" accept='text/html,text/plain' onChange={(e) => {
+                e.preventDefault()
+                const files = [...e.target.files]
+                e.target.value = null
+                if (files.length == 0) return
+                onDropzoneChange(files[0])
+              }} />
               <label htmlFor="dropzone-file" className='d-block mx-auto mb-2 btn btn-sm btn-white rounded-pill waves-effect' style={{
                 width: 'max-content'
               }}>
@@ -279,11 +342,32 @@ const Templates = ({ TINYMCE_KEY }) => {
               <label htmlFor="dropzone-file" className='d-block' style={{ cursor: 'pointer' }}>
                 Arrastra y suelta tu plantilla aquí, o haz clic para seleccionar tu archivo HTML.
               </label>
+              {
+                dropzoneContent?.trim() &&
+                <button
+                  className='d-block mx-auto mt-2 btn btn-sm btn-primary rounded-pill waves-effect'
+                  onClick={() => {
+                    const blob = new Blob([dropzoneContent], { type: 'text/html' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'template.html';
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                  }}
+                  type='button'
+                >
+                  <i className='mdi mdi-download me-1'></i>
+                  Descargar HTML
+                </button>
+              }
             </div>
           </div>
         </div>
       </div>
     </Modal>
+
+    <SendingModal modalRef={sendingModalRef} dataLoaded={dataLoaded} setDataLoaded={setDataLoaded} sessions={sessions}/>
   </>
   )
 };

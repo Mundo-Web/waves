@@ -6,11 +6,13 @@
 <html lang="es">
 
 <head>
+  @viteReactRefresh
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>Waves | Atalaya</title>
   <link rel="shortcut icon" href="/assets/img/icon.svg" type="image/png">
 
+  <link href="/lte/assets/libs/mohithg-switchery/switchery.min.css" rel="stylesheet" type="text/css" />
   <link href="/lte/assets/libs/select2/css/select2.min.css" rel="stylesheet" type="text/css" />
 
   {{-- QuillJs Styles --}}
@@ -147,10 +149,12 @@
     <script src="/lte/assets/libs/codemirror/mode/javascript/javascript.min.js"></script>
     <script src="/lte/assets/libs/codemirror/mode/css/css.min.js"></script>
     <script src="/lte/assets/libs/codemirror/mode/htmlmixed/htmlmixed.min.js"></script>
+    <script href="/lte/assets/libs/js-beautify/beautify-html.min.js"></script>
   @endif
 
   <script src="/lte/assets/libs/quill/quill.min.js"></script>
   <script src="/lte/assets/libs/quill/quill.mention.min.js"></script>
+  <script src="/lte/assets/libs/mohithg-switchery/switchery.min.js"></script>
   <script src="/lte/assets/libs/select2/js/select2.full.min.js"></script>
   <script src="/lte/assets/libs/tippy.js/tippy.all.min.js"></script>
 

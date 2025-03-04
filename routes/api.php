@@ -8,6 +8,7 @@ use App\Http\Controllers\ClientHasProductsController;
 use App\Http\Controllers\ClientNoteController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GmailController;
+use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\KPILeadsController;
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\NotificationController;
@@ -75,6 +76,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/templates/paginate', [TemplateController::class, 'paginate']);
     Route::patch('/templates/status', [TemplateController::class, 'status']);
     Route::delete('/templates/{id}', [TemplateController::class, 'delete']);
+
+    // Histories Routes
+    Route::get('/histories/{id}', [HistoryController::class, 'get']);
+    Route::post('/histories', [HistoryController::class, 'save']);
+    Route::post('/histories/paginate', [HistoryController::class, 'paginate']);
+    Route::patch('/histories/status', [HistoryController::class, 'status']);
+    Route::delete('/histories/{id}', [HistoryController::class, 'delete']);
 
     // Users routes
     Route::post('/users', [UserController::class, 'save']);

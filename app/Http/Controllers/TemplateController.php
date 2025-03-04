@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Session;
 use App\Models\Template;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class TemplateController extends BasicController
 {
@@ -12,8 +14,10 @@ class TemplateController extends BasicController
 
     public function setReactViewProperties(Request $request)
     {
+        $sessions = Session::where('business_id', Auth::user()->business_id)->get();
         return [
-            'TINYMCE_KEY' => \env('TINYMCE_KEY')
+            'TINYMCE_KEY' => env('TINYMCE_KEY'),
+            'sessions' => $sessions
         ];
     }
 

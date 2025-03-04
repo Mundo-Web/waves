@@ -2,15 +2,10 @@
 
 use App\Http\Controllers\ApikeyController;
 use App\Http\Controllers\ArchivedController;
-use App\Http\Controllers\BasicController;
-use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\ClientController;
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\KPILeadsController;
-use App\Http\Controllers\KPIProjectsController;
 use App\Http\Controllers\LeadController;
-use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProcessController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProjectController;
@@ -27,7 +22,6 @@ use App\Http\Controllers\ViewController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,7 +37,7 @@ use Inertia\Inertia;
 Route::get(
     'login',
     fn() => Auth::check()
-    ? redirect('/home')
+        ? redirect('/home')
         // : Inertia::render('Login', [
         //     'PUBLIC_RSA_KEY' => Controller::$PUBLIC_RSA_KEY,
         //     'NOCAPTCHA_SITEKEY' => env('NOCAPTCHA_SITEKEY'),
@@ -60,6 +54,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/home', [HomeController::class, 'reactView'])->name('Home.jsx');
     Route::get('/sessions', [SessionController::class, 'reactView'])->name('Sessions.jsx');
     Route::get('/templates', [TemplateController::class, 'reactView'])->name('Templates.jsx');
+    Route::get('/histories', [HistoryController::class, 'reactView'])->name('Histories.jsx');
 
     Route::get('/clients', [ClientController::class, 'reactView'])->name('Clients.jsx');
     Route::get('/tasks', [TaskController::class, 'reactView'])->name('Tasks.jsx');
