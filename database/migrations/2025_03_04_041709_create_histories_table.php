@@ -14,6 +14,9 @@ return new class extends Migration
     {
         Schema::create('histories', function (Blueprint $table) {
             $table->uuid('id')->default(DB::raw('(UUID())'))->primary();
+
+            $table->foreignUuid('session_id')->constrained('sessions');
+            $table->foreignUuid('template_id')->constrained('templates');
             $table->string('name');
             $table->longText('description')->nullable();
             $table->string('type');
@@ -23,6 +26,7 @@ return new class extends Migration
             $table->integer('failed')->default(false);
             $table->integer('total')->default(false);
             $table->boolean('status')->nullable()->default(null);
+
             $table->timestamps();
         });
     }

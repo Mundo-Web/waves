@@ -79,6 +79,7 @@ Route::middleware('auth')->group(function () {
 
     // Histories Routes
     Route::get('/histories/{id}', [HistoryController::class, 'get']);
+    Route::get('/histories/resend/{id}', [HistoryController::class, 'reSend']);
     Route::post('/histories', [HistoryController::class, 'save']);
     Route::post('/histories/paginate', [HistoryController::class, 'paginate']);
     Route::patch('/histories/status', [HistoryController::class, 'status']);

@@ -90,10 +90,11 @@
       "_index-DE8gkn8h.js"
     ]
   },
-  "_HistoriesRest-C2QO-gBg.js": {
-    "file": "assets/HistoriesRest-C2QO-gBg.js",
+  "_HistoriesRest-BC4UGS-5.js": {
+    "file": "assets/HistoriesRest-BC4UGS-5.js",
     "name": "HistoriesRest",
     "imports": [
+      "_CreateReactScript-CVY3HzKt.js",
       "_Adminto-Do8tLT0J.js"
     ]
   },
@@ -325,21 +326,17 @@
     ]
   },
   "resources/js/Histories.jsx": {
-    "file": "assets/Histories-DQ02R_fG.js",
+    "file": "assets/Histories-CKWfyxWA.js",
     "name": "Histories",
     "src": "resources/js/Histories.jsx",
     "isEntry": true,
     "imports": [
       "_CreateReactScript-CVY3HzKt.js",
       "_ReactAppend-CDtf6x3y.js",
-      "_SetSelectValue-DWTlIjxO.js",
       "_Adminto-Do8tLT0J.js",
-      "_Modal-B5WsfZSb.js",
       "_DxPanelButton-C0qIehcU.js",
-      "_InputFormGroup-CgbdyySZ.js",
-      "_TextareaFormGroup-prMXhYrp.js",
       "_TippyButton-y94h_H6m.js",
-      "_HistoriesRest-C2QO-gBg.js",
+      "_HistoriesRest-BC4UGS-5.js",
       "_server.browser-BDv8EdO-.js"
     ]
   },
@@ -623,7 +620,7 @@
     ]
   },
   "resources/js/Templates.jsx": {
-    "file": "assets/Templates-BadVSobJ.js",
+    "file": "assets/Templates-DzArwohZ.js",
     "name": "Templates",
     "src": "resources/js/Templates.jsx",
     "isEntry": true,
@@ -639,7 +636,7 @@
       "_SelectFormGroup-dxUp-DLT.js",
       "_Editor-oElHw87E.js",
       "_server.browser-BDv8EdO-.js",
-      "_HistoriesRest-C2QO-gBg.js",
+      "_HistoriesRest-BC4UGS-5.js",
       "_index-DE8gkn8h.js"
     ]
   },

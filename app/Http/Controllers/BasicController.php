@@ -37,6 +37,7 @@ class BasicController extends Controller
   public $throwMediaError = false;
   public $imageFields = [];
   public $with4get = [];
+  public $ignoreStatus4pagination = false;
 
   public function get(Request $request, string $id)
   {
@@ -163,13 +164,11 @@ class BasicController extends Controller
 
       if ($request->group != null) {
         [$grouping] = $request->group;
-        // $selector = str_replace('.', '__', $grouping['selector']);
         $selector = $grouping['selector'];
         if (!str_contains($selector, '.') && $this->prefix4filter && !Text::startsWith($selector, '!') && !in_array($selector, $this->ignorePrefix)) {
           $selector = "{$this->prefix4filter}.{$selector}";
         }
-        // $instance = $this->model::select(DB::raw("{$selector} AS key"))
-        $instance = $instance->select(DB::raw("{$selector} AS key"))
+        $instance = $instance->select(DB::raw("{$selector} AS `key`"))
           ->groupBy(str_replace('!', '', $selector));
       }
 
@@ -189,7 +188,7 @@ class BasicController extends Controller
         });
       }
 
-      if (Schema::hasColumn((new $this->model)->getTable(), 'status')) {
+      if (Schema::hasColumn((new $this->model)->getTable(), 'status') && !$this->ignoreStatus4pagination) {
         if ($this->prefix4filter) {
           $instance->whereNotNull("{$this->prefix4filter}.status");
         } else {
@@ -209,13 +208,14 @@ class BasicController extends Controller
             $sorting['desc'] ? 'DESC' : 'ASC'
           );
         }
-      } else {
-        if ($this->prefix4filter) {
-          $instance->orderBy("{$this->prefix4filter}.id", 'DESC');
-        } else {
-          $instance->orderBy('id', 'DESC');
-        }
       }
+      // else {
+      //   if ($this->prefix4filter) {
+      //     $instance->orderBy("{$this->prefix4filter}.id", 'DESC');
+      //   } else {
+      //     $instance->orderBy('id', 'DESC');
+      //   }
+      // }
 
       $totalCount = 0;
       if ($request->requireTotalCount) {

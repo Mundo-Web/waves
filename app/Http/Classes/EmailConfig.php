@@ -4,7 +4,7 @@ namespace App\Http\Classes;
 
 use PHPMailer\PHPMailer\PHPMailer;
 
-class EmailConfig
+class  EmailConfig
 {
     public static function config(): PHPMailer
     {

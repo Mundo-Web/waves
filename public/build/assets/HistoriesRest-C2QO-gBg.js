@@ -1,1 +1,0 @@
-var a=Object.defineProperty;var r=(e,s,t)=>s in e?a(e,s,{enumerable:!0,configurable:!0,writable:!0,value:t}):e[s]=t;var i=(e,s,t)=>(r(e,typeof s!="symbol"?s+"":s,t),t);import{B as o}from"./Adminto-Do8tLT0J.js";class c extends o{constructor(){super(...arguments);i(this,"path","histories");i(this,"hasFiles",!0)}}export{c as H};

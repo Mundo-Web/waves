@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class History extends Model
+class HistoryDetail extends Model
 {
     use HasFactory, HasUuids;
 
@@ -14,20 +14,13 @@ class History extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'session_id',
-        'template_id',
-        'name',
-        'description',
-        'type',
-        'mapping',
-        'triggered',
-        'completed',
-        'failed',
-        'total',
-        'status'
+        'history_id',
+        'data',
+        'status',
+        'error',
     ];
 
     protected $casts = [
-        'mapping' => 'array',
+        'data' => 'array',
     ];
 }

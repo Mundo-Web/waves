@@ -5,16 +5,13 @@ import CreateReactScript from './Utils/CreateReactScript.jsx'
 import ReactAppend from './Utils/ReactAppend.jsx'
 import SetSelectValue from './Utils/SetSelectValue.jsx'
 import Adminto from './components/Adminto.jsx'
-import Modal from './components/Modal.jsx'
 import Table from './components/Table.jsx'
-import InputFormGroup from './components/form/InputFormGroup.jsx'
-import SelectAPIFormGroup from './components/form/SelectAPIFormGroup.jsx'
-import TextareaFormGroup from './components/form/TextareaFormGroup.jsx'
 import TippyButton from './components/form/TippyButton.jsx'
 import DxPanelButton from './components/dx/DxPanelButton.jsx'
 import HistoriesRest from './actions/HistoriesRest.js'
+import { renderToString } from 'react-dom/server'
 
-const historiesRest= new HistoriesRest()
+const historiesRest = new HistoriesRest()
 
 const Histories = () => {
   const gridRef = useRef()
@@ -69,6 +66,12 @@ const Histories = () => {
     $(gridRef.current).dxDataGrid('instance').refresh()
   }
 
+  const onReSendClicked = async (id) => {
+    const result = await historiesRest.reSend(id)
+    if (!result) return
+    $(gridRef.current).dxDataGrid('instance').refresh()
+  }
+
   return (<>
     <Table gridRef={gridRef} title={<h4 className='header-title my-0'>Historial de envios</h4>} rest={historiesRest}
       toolBar={(container) => {
@@ -89,67 +92,107 @@ const Histories = () => {
       }}
       columns={[
         {
-          dataField: 'id',
-          caption: 'ID',
-          visible: false
+          dataField: 'created_at',
+          dataType: 'datetime',
+          caption: 'Fecha',
+          width: '160px',
+          sortOrder: 'desc'
+        },
+        {
+          dataField: 'type',
+          caption: 'Tipo',
+          cellTemplate: (container, { value }) => {
+            if (value == 'WhatsApp') {
+              ReactAppend(container, <>
+                <i className='mdi mdi-whatsapp me-1'></i>
+                {value}
+              </>)
+            } else {
+              ReactAppend(container, <>
+                <i className='mdi mdi-email me-1'></i>
+                {value}
+              </>)
+            }
+          }
         },
         {
           dataField: 'name',
           caption: 'Plantilla'
         },
         {
+          dataField: 'completed',
+          caption: 'Completados',
+          dataType: 'number',
+          width: '80px',
+          cellTemplate: (container, { value }) => {
+            container.html(renderToString(<b className='text-success'>{value}</b>))
+          }
+        },
+        {
+          dataField: 'failed',
+          caption: 'Fallidos',
+          dataType: 'number',
+          width: '80px',
+          cellTemplate: (container, { value }) => {
+            container.html(renderToString(<b className='text-danger'>{value}</b>))
+          }
+        },
+        {
+          dataField: 'total',
+          caption: 'Total',
+          dataType: 'number',
+          width: '80px',
+          cellTemplate: (container, { value }) => {
+            container.html(renderToString(<b className='text-primary'>{value}</b>))
+          }
+        },
+        {
           dataField: 'status',
           caption: 'Estado',
           dataType: 'boolean',
+          width: '140px',
           cellTemplate: (container, { data }) => {
-            switch (data.status) {
-              case 1:
-                ReactAppend(container, <span className='badge bg-success rounded-pill'>Activo</span>)
-                break
-              case 0:
-                ReactAppend(container, <span className='badge bg-danger rounded-pill'>Inactivo</span>)
-                break
-              default:
-                ReactAppend(container, <span className='badge bg-dark rounded-pill'>Eliminado</span>)
-                break
-            }
+            if (data.status === 1) ReactAppend(container, <>
+              <i className='mdi mdi-check me-1'></i>
+              <span>Terminado</span>
+            </>)
+            if (data.status === 0) ReactAppend(container, <>
+              <i className='mdi mdi-spin mdi-autorenew me-1'></i>
+              <span>En curso</span>
+            </>)
+            if (data.status === null) ReactAppend(container, <>
+              <i className='mdi mdi-clock me-1'></i>
+              <span>Pendiente</span>
+            </>)
+          },
+          lookup: {
+            dataSource: [
+              { key: 1, value: 'Completado' },
+              { key: 0, value: 'Enviando' },
+              { key: null, value: 'Pendiente' }
+            ],
+            valueExpr: 'key',
+            displayExpr: 'value'
           }
         },
         {
           caption: 'Acciones',
+          width: '130px',
           cellTemplate: (container, { data }) => {
             container.attr('style', 'display: flex; gap: 4px; overflow: unset')
 
-            ReactAppend(container, <TippyButton className='btn btn-xs btn-soft-primary' title='Editar' onClick={() => onModalOpen(data)}>
-              <i className='fa fa-pen'></i>
+            if (data.status === null) ReactAppend(container, <TippyButton className='btn btn-xs btn-soft-primary' title='Reintentar envio' onClick={() => onReSendClicked(data.id)}>
+              <i className='mdi mdi-reload'></i>
             </TippyButton>)
 
-            ReactAppend(container, <TippyButton className='btn btn-xs btn-light' title={data.status === null ? 'Restaurar' : 'Cambiar estado'} onClick={() => onStatusChange(data)}>
-              {
-                data.status === 1
-                  ? <i className='fa fa-toggle-on text-success' />
-                  : data.status === 0 ?
-                    <i className='fa fa-toggle-off text-danger' />
-                    : <i className='fas fa-trash-restore' />
-              }
-            </TippyButton>)
-
-            ReactAppend(container, <TippyButton className='btn btn-xs btn-soft-danger' title='Eliminar' onClick={() => onDeleteClicked(data.id)}>
-              <i className='fa fa-trash-alt'></i>
+            ReactAppend(container, <TippyButton className='btn btn-xs btn-soft-dark' title='Ver detalles de envio' onClick={() => console.log('hola')}>
+              <i className='mdi mdi-format-list-bulleted-type'></i>
             </TippyButton>)
           },
           allowFiltering: false,
           allowExporting: false
         }
       ]} />
-    <Modal modalRef={modalRef} title={isEditing ? 'Editar tipo' : 'Agregar tipo'} onSubmit={onModalSubmit} size='sm'>
-      <div className='row' id='type-crud-container'>
-        <input ref={idRef} type='hidden' />
-        <InputFormGroup eRef={nameRef} label='Tipo' col='col-12' required />
-        <SelectAPIFormGroup eRef={tableRef} label='Tabla' col='col-12' dropdownParent='#type-crud-container' searchAPI='/api/tables/paginate' searchBy='name' required />
-        <TextareaFormGroup eRef={descriptionRef} label='Descripcion' col='col-12' />
-      </div>
-    </Modal>
   </>
   )
 };
