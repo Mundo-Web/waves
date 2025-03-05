@@ -19,8 +19,11 @@ import { Editor } from '@tinymce/tinymce-react'
 import { Clipboard } from 'sode-extend-react'
 import { renderToString } from 'react-dom/server'
 import SendingModal from './Reutilizables/Templates/SendingModal.jsx'
+import RepositoryRest from './actions/RepositoryRest.js'
+import Global from './Utils/Global.js'
 
 const templatesRest = new TemplatesRest()
+const repositoryRest = new RepositoryRest()
 
 const Templates = ({ TINYMCE_KEY, sessions }) => {
 
@@ -189,9 +192,37 @@ const Templates = ({ TINYMCE_KEY, sessions }) => {
     })
   }, [null])
 
-  const processWywiwygContent = (newContent) => {
-    console.log(newContent)
-    setWysiwygContent(newContent)
+  const processWywiwygContent = async (newContent) => {
+    const body = $(`<div>${newContent}</div>`)
+    const imgs = body.find('img[src^="data:"]')
+
+    if (imgs.length > 0) {
+      for (const img of imgs) {
+        const src = img.getAttribute('src');
+
+        const base64Data = src.split(',')[1];
+        const mimeType = src.split(',')[0].split(':')[1].split(';')[0];
+
+        const byteCharacters = atob(base64Data);
+        const byteArrays = [];
+
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteArrays.push(byteCharacters.charCodeAt(i));
+        }
+
+        const byteArray = new Uint8Array(byteArrays);
+        const file = new File([byteArray], `${crypto.randomUUID()}.${mimeType.split('/')[1]}`, { type: mimeType });
+
+        const formData = new FormData()
+        formData.append('file', file)
+        const result = await repositoryRest.save(formData);
+        const newSrc = result.url
+        img.setAttribute('src', `${Global.APP_URL}/${newSrc}`)
+      }
+      setWysiwygContent(body.html())
+    } else {
+      setWysiwygContent(newContent)
+    }
   }
 
   return (<>

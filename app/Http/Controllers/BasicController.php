@@ -4,12 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Classes\dxResponse;
 use App\Models\Atalaya\Business;
-use App\Models\Client;
 use App\Models\dxDataGrid;
-use App\Models\Notification;
-use App\Models\Setting;
-use App\Models\Task;
-use App\Models\View;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -24,6 +19,7 @@ use SoDe\Extend\Response;
 use SoDe\Extend\Text;
 use SoDe\Extend\Crypto;
 use Illuminate\Support\Facades\Schema;
+use SoDe\Extend\File;
 
 class BasicController extends Controller
 {
@@ -38,6 +34,7 @@ class BasicController extends Controller
   public $imageFields = [];
   public $with4get = [];
   public $ignoreStatus4pagination = false;
+  public $publicMedia = false;
 
   public function get(Request $request, string $id)
   {
@@ -279,8 +276,16 @@ class BasicController extends Controller
         $full = $request->file($field);
         $uuid = Crypto::randomUUID();
         $ext = $full->getClientOriginalExtension();
-        $path = "images/{$snake_case}/{$uuid}.{$ext}";
-        Storage::put($path, file_get_contents($full));
+        $path = $this->publicMedia
+          ? public_path("TEMP/{$snake_case}")
+          : storage_path("app/images/{$snake_case}");
+
+        if (!file_exists($path)) {
+          mkdir($path, 0777, true);
+        }
+
+        File::save("{$path}/{$uuid}.{$ext}", file_get_contents($full));
+        // Storage::put($path, file_get_contents($full));
         $body[$field] = "{$uuid}.{$ext}";
       }
 

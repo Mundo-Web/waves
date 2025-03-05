@@ -20,6 +20,7 @@ use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProcessController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RemainingHistoryController;
+use App\Http\Controllers\RepositoryController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\StatusController;
@@ -76,6 +77,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/templates/paginate', [TemplateController::class, 'paginate']);
     Route::patch('/templates/status', [TemplateController::class, 'status']);
     Route::delete('/templates/{id}', [TemplateController::class, 'delete']);
+
+    // Histories Routes
+    Route::get('/repository/{id}', [RepositoryController::class, 'get']);
+    Route::get('/repository/resend/{id}', [RepositoryController::class, 'reSend']);
+    Route::post('/repository', [RepositoryController::class, 'save']);
+    Route::post('/repository/paginate', [RepositoryController::class, 'paginate']);
+    Route::patch('/repository/status', [RepositoryController::class, 'status']);
+    Route::delete('/repository/{id}', [RepositoryController::class, 'delete']);
 
     // Histories Routes
     Route::get('/histories/{id}', [HistoryController::class, 'get']);
