@@ -109,7 +109,7 @@ class SendMessagesJob implements ShouldQueue
       } finally {
         HistoryDetail::create([
           'history_id' => $historyJpa->id,
-          'sent_to' => $email,
+          'sent_to' => $email, 
           'data' => $row,
           'status' => $success,
           'error' => $error,
