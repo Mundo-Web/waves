@@ -189,6 +189,11 @@ const Templates = ({ TINYMCE_KEY, sessions }) => {
     })
   }, [null])
 
+  const processWywiwygContent = (newContent) => {
+    console.log(newContent)
+    setWysiwygContent(newContent)
+  }
+
   return (<>
     <Table gridRef={gridRef} title='Plantillas' rest={templatesRest}
       toolBar={(container) => {
@@ -312,7 +317,7 @@ const Templates = ({ TINYMCE_KEY, sessions }) => {
               height: '600px',
             }}
             value={wysiwygContent}
-            onEditorChange={(newValue) => setWysiwygContent(newValue)}
+            onEditorChange={(newValue) => processWywiwygContent(newValue)}
           />
           <div className='mb-2'></div>
         </div>
@@ -367,7 +372,7 @@ const Templates = ({ TINYMCE_KEY, sessions }) => {
       </div>
     </Modal>
 
-    <SendingModal modalRef={sendingModalRef} dataLoaded={dataLoaded} setDataLoaded={setDataLoaded} sessions={sessions}/>
+    <SendingModal modalRef={sendingModalRef} dataLoaded={dataLoaded} setDataLoaded={setDataLoaded} sessions={sessions} />
   </>
   )
 };
