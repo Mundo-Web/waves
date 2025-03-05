@@ -15,6 +15,7 @@ class HistoryDetail extends Model
 
     protected $fillable = [
         'history_id',
+        'sent_to',
         'data',
         'status',
         'error',

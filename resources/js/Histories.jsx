@@ -101,6 +101,7 @@ const Histories = () => {
         {
           dataField: 'type',
           caption: 'Tipo',
+          width: '120px',
           cellTemplate: (container, { value }) => {
             if (value == 'WhatsApp') {
               ReactAppend(container, <>

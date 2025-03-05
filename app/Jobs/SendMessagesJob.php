@@ -16,6 +16,8 @@ use App\Models\Template;
 use App\Models\User;
 use Exception;
 use PHPMailer\PHPMailer\PHPMailer;
+use SoDe\Extend\Fetch;
+use SoDe\Extend\JSON;
 use SoDe\Extend\Text;
 
 class SendMessagesJob implements ShouldQueue
@@ -48,6 +50,11 @@ class SendMessagesJob implements ShouldQueue
       if ($sessionJpa->type == 'WhatsApp') {
         $this->sendWhatsApp($sessionJpa, $templateJpa, $historyJpa);
       }
+
+      $historyJpa->completed = HistoryDetail::where('history_id', $historyJpa->id)->where('status', true)->count();
+      $historyJpa->failed = HistoryDetail::where('history_id', $historyJpa->id)->where('status', false)->count();
+      $historyJpa->status = true;
+      $historyJpa->save();
     } catch (\Throwable $th) {
       dump($th->getMessage());
     }
@@ -55,7 +62,6 @@ class SendMessagesJob implements ShouldQueue
 
   public function sendEmail($sessionJpa, $templateJpa)
   {
-
     $historyJpa = $this->historyJpa;
 
     // INICIO: SMTP Config
@@ -78,20 +84,24 @@ class SendMessagesJob implements ShouldQueue
     foreach ($this->rows as $row) {
       $success = false;
       $error = 'Error desconocido';
-      try {
-        $emailField = $historyJpa->mapping['waves_send_to'];
 
+      $emailField = $historyJpa->mapping['waves_send_to'];
+      $email = $row[$emailField];
+
+      try {
         $data = [];
-        foreach ($templateJpa->vars as $value) {
-          $data['{{' . $value . '}}'] = $row[$historyJpa->mapping[$value]];
+        foreach ($templateJpa->vars as $var) {
+          $data[$var] = $row[$historyJpa->mapping[$var]];
         }
 
-        $mail->addAddress($row[$emailField]);
+        $html = Text::replaceData($templateJpa->content, $data);
+
+        $mail->addAddress($email);
         $mail->Subject = $templateJpa->name;
-        $mail->Body = Text::replaceData($templateJpa->content, $data);
+        $mail->Body = $html;
         $mail->isHTML(true);
         $mail->send();
-        
+
         $success = true;
         $error = null;
       } catch (\Throwable $th) {
@@ -99,6 +109,7 @@ class SendMessagesJob implements ShouldQueue
       } finally {
         HistoryDetail::create([
           'history_id' => $historyJpa->id,
+          'sent_to' => $email,
           'data' => $row,
           'status' => $success,
           'error' => $error,
@@ -106,12 +117,56 @@ class SendMessagesJob implements ShouldQueue
       }
     }
     $mail->smtpClose();
-
-    $historyJpa->completed = HistoryDetail::where('history_id', $historyJpa->id)->where('status', true)->count();
-    $historyJpa->failed = HistoryDetail::where('history_id', $historyJpa->id)->where('status', false)->count();
-    $historyJpa->status = true;
-    $historyJpa->save();
   }
 
-  public function sendWhatsApp($sessionJpa, $templateJpa) {}
+  public function sendWhatsApp($sessionJpa, $templateJpa)
+  {
+    $historyJpa = $this->historyJpa;
+
+    foreach ($this->rows as $row) {
+      $success = false;
+      $error = 'Error desconocido';
+      $phoneField = $historyJpa->mapping['waves_send_to'];
+      $phone = Text::keep($row[$phoneField], '0123456789');
+
+      try {
+        $data = [];
+        foreach ($templateJpa->vars as $var) {
+          $data[$var] = $row[$historyJpa->mapping[$var]];
+        }
+
+        $html = Text::replaceData($templateJpa->content, $data);
+
+        $res = new Fetch(env('WA_URL') . '/api/send', [
+          'method' => 'POST',
+          'headers' => [
+            'Content-Type' => 'application/json'
+          ],
+          'body' => [
+            'from' => env('APP_CORRELATIVE') . '-' . $sessionJpa->id,
+            'to' => [$phone],
+            'html' => $html,
+          ]
+        ]);
+
+        if (!$res->ok) {
+          $data = JSON::parseable($res->text());
+          throw new Exception($data['message'] ?? 'Error desconocido');
+        }
+
+        $success = true;
+        $error = null;
+      } catch (\Throwable $th) {
+        $error = $th->getMessage();
+      } finally {
+        HistoryDetail::create([
+          'history_id' => $historyJpa->id,
+          'sent_to' => $phone,
+          'data' => $row,
+          'status' => $success,
+          'error' => $error,
+        ]);
+      }
+    }
+  }
 }

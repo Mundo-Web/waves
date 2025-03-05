@@ -16,6 +16,7 @@ return new class extends Migration
             $table->uuid('id')->default(DB::raw('(UUID())'))->primary();
 
             $table->foreignUuid('history_id')->constrained('histories')->cascadeOnDelete();
+            $table->longText('sent_to');
             $table->json('data');
             $table->boolean('status')->default(false);
             $table->longText('error')->nullable();
