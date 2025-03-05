@@ -346,7 +346,7 @@ const Templates = ({ TINYMCE_KEY, sessions }) => {
               ],
               ai_request: (request, respondWith) => respondWith.string(() => Promise.reject('See docs to implement AI Assistant')),
               height: '600px',
-              
+              base_url: window.location.origin
             }}
             value={wysiwygContent}
             onEditorChange={(newValue) => processWywiwygContent(newValue)}
