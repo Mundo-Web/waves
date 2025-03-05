@@ -217,7 +217,7 @@ const Templates = ({ TINYMCE_KEY, sessions }) => {
         formData.append('file', file)
         const result = await repositoryRest.save(formData);
         const newSrc = result.url
-        img.setAttribute('src', `${Global.APP_URL}/${newSrc}`)
+        img.setAttribute('src', `${window.location.origin}/${newSrc}`)
       }
       setWysiwygContent(body.html())
     } else {
@@ -346,6 +346,7 @@ const Templates = ({ TINYMCE_KEY, sessions }) => {
               ],
               ai_request: (request, respondWith) => respondWith.string(() => Promise.reject('See docs to implement AI Assistant')),
               height: '600px',
+              
             }}
             value={wysiwygContent}
             onEditorChange={(newValue) => processWywiwygContent(newValue)}
