@@ -217,7 +217,7 @@ const Templates = ({ TINYMCE_KEY, sessions }) => {
         formData.append('file', file)
         const result = await repositoryRest.save(formData);
         const newSrc = result.url
-        img.setAttribute('src', `${window.location.origin}/${newSrc}`)
+        img.setAttribute('src', `https://temp.${Global.APP_DOMAIN}/${newSrc.replace('TEMP/', '')}`)
       }
       setWysiwygContent(body.html())
     } else {
