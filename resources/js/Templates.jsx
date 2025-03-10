@@ -44,7 +44,7 @@ const Templates = ({ TINYMCE_KEY, sessions }) => {
   const [dataLoaded, setDataLoaded] = useState(null)
 
   const [isEditing, setIsEditing] = useState(false)
-  const [isDesigning, setIsDesigning] = useState(true)
+  const [isDesigning, setIsDesigning] = useState(false)
   const [templateActive, setTemplateActive] = useState({})
   const [typeEdition, setTypeEdition] = useState('wysiwyg')
 
