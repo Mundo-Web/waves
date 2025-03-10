@@ -29,7 +29,6 @@ const Templates = ({ TINYMCE_KEY, sessions }) => {
 
   const gridRef = useRef()
   const modalRef = useRef()
-  const designModalRef = useRef()
   const sendingModalRef = useRef()
   const ddRef = useRef()
 
@@ -45,6 +44,7 @@ const Templates = ({ TINYMCE_KEY, sessions }) => {
   const [dataLoaded, setDataLoaded] = useState(null)
 
   const [isEditing, setIsEditing] = useState(false)
+  const [isDesigning, setIsDesigning] = useState(true)
   const [templateActive, setTemplateActive] = useState({})
   const [typeEdition, setTypeEdition] = useState('wysiwyg')
 
@@ -70,7 +70,7 @@ const Templates = ({ TINYMCE_KEY, sessions }) => {
     setTemplateActive(result);
     setTypeEdition('wysiwyg')
     setWysiwygContent(result?.content ?? '<i>- Agrega tu contenido aqui -</i>');
-    $(designModalRef.current).modal('show')
+    setIsDesigning(true)
   }
 
   const onModalSubmit = async (e) => {
@@ -103,8 +103,6 @@ const Templates = ({ TINYMCE_KEY, sessions }) => {
 
     const result = await templatesRest.save(request)
     if (!result) return
-
-    $(designModalRef.current).modal('hide')
   }
 
   const onStatusChange = async ({ id, status }) => {
@@ -218,7 +216,7 @@ const Templates = ({ TINYMCE_KEY, sessions }) => {
         formData.append('file', file)
         const result = await repositoryRest.save(formData);
         const newSrc = result.url
-        img.setAttribute('src', `https://temp.${Global.APP_DOMAIN}/${newSrc.replace('TEMP/', '')}`) 
+        img.setAttribute('src', `https://temp.${Global.APP_DOMAIN}/${newSrc.replace('TEMP/', '')}`)
       }
       setWysiwygContent(body.html())
     } else {
@@ -227,70 +225,72 @@ const Templates = ({ TINYMCE_KEY, sessions }) => {
   }
 
   return (<>
-    <Table gridRef={gridRef} title='Plantillas' rest={templatesRest}
-      toolBar={(container) => {
-        container.unshift(DxPanelButton({
-          className: 'btn btn-xs btn-soft-dark',
-          text: 'Actualizar',
-          title: 'Refrescar tabla',
-          icon: 'fas fa-undo-alt',
-          onClick: () => $(gridRef.current).dxDataGrid('instance').refresh()
-        }))
-        container.unshift(DxPanelButton({
-          className: 'btn btn-xs btn-soft-primary',
-          text: 'Nuevo',
-          title: 'Agregar registro',
-          icon: 'fa fa-plus',
-          onClick: () => onModalOpen()
-        }))
-      }}
-      columns={[
-        {
-          dataField: 'name',
-          caption: 'Nombre',
-          cellTemplate: (container, { data }) => {
-            container.html(renderToString(<b>{data.name}</b>))
+    <div hidden={isDesigning}>
+      <Table gridRef={gridRef} title='Plantillas' rest={templatesRest}
+        toolBar={(container) => {
+          container.unshift(DxPanelButton({
+            className: 'btn btn-xs btn-soft-dark',
+            text: 'Actualizar',
+            title: 'Refrescar tabla',
+            icon: 'fas fa-undo-alt',
+            onClick: () => $(gridRef.current).dxDataGrid('instance').refresh()
+          }))
+          container.unshift(DxPanelButton({
+            className: 'btn btn-xs btn-soft-primary',
+            text: 'Nuevo',
+            title: 'Agregar registro',
+            icon: 'fa fa-plus',
+            onClick: () => onModalOpen()
+          }))
+        }}
+        columns={[
+          {
+            dataField: 'name',
+            caption: 'Nombre',
+            cellTemplate: (container, { data }) => {
+              container.html(renderToString(<b>{data.name}</b>))
+            }
+          },
+          {
+            dataField: 'description',
+            caption: 'Descripcion'
+          },
+          {
+            dataField: 'status',
+            caption: 'Estado',
+            dataType: 'boolean',
+            width: '120px',
+            cellTemplate: (container, { data }) => {
+              ReactAppend(container, <SwitchFormGroup checked={data.status} onChange={(e) => onStatusChange({ id: data.id, status: !e.target.checked })} />)
+            },
+          },
+          {
+            caption: 'Acciones',
+            width: '180px',
+            cellTemplate: (container, { data }) => {
+              container.attr('style', 'display: flex; gap: 4px; overflow: unset')
+
+              ReactAppend(container, <TippyButton className='btn btn-xs btn-soft-primary' title='Editar' onClick={() => onModalOpen(data)}>
+                <i className='mdi mdi-pencil'></i>
+              </TippyButton>)
+
+              ReactAppend(container, <TippyButton className='btn btn-xs btn-soft-dark' title='Diseñar plantilla' onClick={() => onEditorModalOpen(data)} data-loading-text='<i className="fa fa-spinner fa-spin"></i>'>
+                <i className='mdi mdi-circle-edit-outline'></i>
+              </TippyButton>)
+
+              ReactAppend(container, <TippyButton className='btn btn-xs btn-white' title='Enviar mensajes masivos' onClick={() => onSendingModalClicked(data)}>
+                <i className='mdi mdi-email-send'></i>
+              </TippyButton>)
+
+              ReactAppend(container, <TippyButton className='btn btn-xs btn-soft-danger' title='Eliminar' onClick={() => onDeleteClicked(data.id)}>
+                <i className='mdi mdi-delete'></i>
+              </TippyButton>)
+            },
+            allowFiltering: false,
+            allowExporting: false
           }
-        },
-        {
-          dataField: 'description',
-          caption: 'Descripcion'
-        },
-        {
-          dataField: 'status',
-          caption: 'Estado',
-          dataType: 'boolean',
-          width: '120px',
-          cellTemplate: (container, { data }) => {
-            ReactAppend(container, <SwitchFormGroup checked={data.status} onChange={(e) => onStatusChange({ id: data.id, status: !e.target.checked })} />)
-          },
-        },
-        {
-          caption: 'Acciones',
-          width: '180px',
-          cellTemplate: (container, { data }) => {
-            container.attr('style', 'display: flex; gap: 4px; overflow: unset')
-
-            ReactAppend(container, <TippyButton className='btn btn-xs btn-soft-primary' title='Editar' onClick={() => onModalOpen(data)}>
-              <i className='mdi mdi-pencil'></i>
-            </TippyButton>)
-
-            ReactAppend(container, <TippyButton className='btn btn-xs btn-soft-dark' title='Diseñar plantilla' onClick={() => onEditorModalOpen(data)} data-loading-text='<i className="fa fa-spinner fa-spin"></i>'>
-              <i className='mdi mdi-circle-edit-outline'></i>
-            </TippyButton>)
-
-            ReactAppend(container, <TippyButton className='btn btn-xs btn-white' title='Enviar mensajes masivos' onClick={() => onSendingModalClicked(data)}>
-              <i className='mdi mdi-email-send'></i>
-            </TippyButton>)
-
-            ReactAppend(container, <TippyButton className='btn btn-xs btn-soft-danger' title='Eliminar' onClick={() => onDeleteClicked(data.id)}>
-              <i className='mdi mdi-delete'></i>
-            </TippyButton>)
-          },
-          allowFiltering: false,
-          allowExporting: false
-        }
-      ]} />
+        ]} />
+    </div>
     <Modal modalRef={modalRef} title={isEditing ? 'Editar plantilla' : 'Agregar plantilla'} onSubmit={onModalSubmit} size='sm'>
       <div className='row' id='template-container'>
         <input ref={idRef} type='hidden' />
@@ -303,112 +303,130 @@ const Templates = ({ TINYMCE_KEY, sessions }) => {
         <TextareaFormGroup eRef={descriptionRef} label='Descripcion' />
       </div>
     </Modal>
-    <Modal modalRef={designModalRef} title={`Diseñador de plantillas - ${templateActive.name}`} btnSubmitText='Guardar' onSubmit={onDesignModalSubmit} size='xl' isStatic>
-      <ul className="nav nav-pills navtab-bg justify-content-center flex-wrap gap-1">
-        <li className="nav-item">
-          <a href="#wysiwyg-editor" className={`nav-link text-center ${typeEdition == 'wysiwyg' ? 'active' : ''}`} style={{
-            width: '200px'
-          }} onClick={() => onTypeEditionClicked('wysiwyg')}>
-            <i className='mdi mdi-page-layout-header-footer me-1'></i>
-            Editor WYSIWYG
-          </a>
-        </li>
-        <li className="nav-item">
-          <a href="#code-editor" className={`nav-link text-center ${typeEdition == 'code' ? 'active' : ''}`} style={{
-            width: '200px'
-          }} onClick={() => onTypeEditionClicked('code')}>
-            <i className='mdi mdi-code-tags me-1'></i>
-            Editor de codigo
-          </a>
-        </li>
-        <li className="nav-item">
-          <a href="#dropzone" className={`nav-link text-center ${typeEdition == 'dropzone' ? 'active' : ''}`} style={{
-            width: '200px'
-          }} onClick={() => onTypeEditionClicked('dropzone')}>
-            <i className='mdi mdi-cloud-upload me-1'></i>
-            Carga tu archivo
-          </a>
-        </li>
-      </ul>
-      <div className="tab-content">
-        <div className={`tab-pane ${typeEdition == 'wysiwyg' ? 'active' : ''}`} id="wysiwyg-editor">
-          <Editor
-            apiKey={TINYMCE_KEY}
-            onInit={(_evt, editor) => tinyEditorRef.current = editor}
-            init={{
-              plugins: [
-                'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'image', 'link', 'lists', 'media', 'searchreplace', 'table', 'visualblocks', 'wordcount',
-              ],
-              toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
-              tinycomments_mode: 'embedded',
-              tinycomments_author: 'Author name',
-              height: '600px',
-              // Add these configurations
-              readonly: false,
-              table_tab_navigation: true,
-              table_default_attributes: {
-                border: '1'
-              },
-              table_appearance_options: true,
-              table_advtab: true,
-              table_cell_advtab: true,
-              table_row_advtab: true
-            }}
-            value={wysiwygContent}
-            onEditorChange={(newValue) => processWywiwygContent(newValue)}
-          />
-          <div className='mb-2'></div>
-        </div>
-        <div className={`tab-pane ${typeEdition == 'code' ? 'active' : ''}`} id="code-editor">
-          <EditorFormGroup editorRef={codeEditorRef} onChange={e => setCodeContent(e.target.value)} />
-        </div>
-        <div className={`tab-pane ${typeEdition == 'dropzone' ? 'active' : ''}`} id="dropzone">
-          <div ref={ddRef} className='d-flex align-items-center justify-content-center mb-2 border' style={{
-            height: '600px',
-            borderRadius: '10px'
-          }}>
-            <div>
-
-              <input className='d-none' id='dropzone-file' type="file" accept='text/html,text/plain' onChange={(e) => {
-                e.preventDefault()
-                const files = [...e.target.files]
-                e.target.value = null
-                if (files.length == 0) return
-                onDropzoneChange(files[0])
-              }} />
-              <label htmlFor="dropzone-file" className='d-block mx-auto mb-2 btn btn-sm btn-white rounded-pill waves-effect' style={{
-                width: 'max-content'
-              }}>
-                <i className='mdi mdi-paperclip me-1'></i>
-                Seleccionar archivo
-              </label>
-              <label htmlFor="dropzone-file" className='d-block' style={{ cursor: 'pointer' }}>
-                Arrastra y suelta tu plantilla aquí, o haz clic para seleccionar tu archivo HTML.
-              </label>
-              {
-                dropzoneContent?.trim() &&
-                <button
-                  className='d-block mx-auto mt-2 btn btn-sm btn-primary rounded-pill waves-effect'
-                  onClick={() => {
-                    const blob = new Blob([dropzoneContent], { type: 'text/html' });
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'template.html';
-                    a.click();
-                    window.URL.revokeObjectURL(url);
+    <form className='row' onSubmit={onDesignModalSubmit} hidden={!isDesigning}>
+      <div className="col-12">
+        <div className="card">
+          <div className="card-header d-flex gap-1 align-items-center justify-content-between">
+            <div className='d-flex gap-1 align-items-center'>
+              <button className='btn btn-white btn-xs rounded-pill' onClick={() => setIsDesigning(false)} type='button'>
+                <i className='mdi mdi-chevron-left me-1'></i> Volver
+              </button>
+              <h4 className="header-title my-0">Diseñador de plantillas - {templateActive?.name}</h4>
+            </div>
+            <button className='btn btn-xs btn-success' type='submit'>
+              <i className='mdi mdi-save me-1'></i>
+              Guardar
+            </button>
+          </div>
+          <div className="card-body">
+            <ul className="nav nav-pills navtab-bg justify-content-center flex-wrap gap-1">
+              <li className="nav-item">
+                <a href="#wysiwyg-editor" className={`nav-link text-center ${typeEdition == 'wysiwyg' ? 'active' : ''}`} style={{
+                  width: '200px'
+                }} onClick={() => onTypeEditionClicked('wysiwyg')}>
+                  <i className='mdi mdi-page-layout-header-footer me-1'></i>
+                  Editor WYSIWYG
+                </a>
+              </li>
+              <li className="nav-item">
+                <a href="#code-editor" className={`nav-link text-center ${typeEdition == 'code' ? 'active' : ''}`} style={{
+                  width: '200px'
+                }} onClick={() => onTypeEditionClicked('code')}>
+                  <i className='mdi mdi-code-tags me-1'></i>
+                  Editor de codigo
+                </a>
+              </li>
+              <li className="nav-item">
+                <a href="#dropzone" className={`nav-link text-center ${typeEdition == 'dropzone' ? 'active' : ''}`} style={{
+                  width: '200px'
+                }} onClick={() => onTypeEditionClicked('dropzone')}>
+                  <i className='mdi mdi-cloud-upload me-1'></i>
+                  Carga tu archivo
+                </a>
+              </li>
+            </ul>
+            <div className="tab-content">
+              <div className={`tab-pane ${typeEdition == 'wysiwyg' ? 'active' : ''}`} id="wysiwyg-editor">
+                <Editor
+                  apiKey={TINYMCE_KEY}
+                  onInit={(_evt, editor) => tinyEditorRef.current = editor}
+                  init={{
+                    plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
+                    toolbar: 'myDataButton myPreviewButton blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | align lineheight | tinycomments | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
+                    // menubar: false,
+                    tinycomments_mode: 'embedded',
+                    tinycomments_author: 'Author name',
+                    height: '660px',
+                    // Add these configurations
+                    readonly: false,
+                    table_tab_navigation: true,
+                    table_default_attributes: {
+                      border: '1'
+                    },
+                    table_appearance_options: true,
+                    table_advtab: true,
+                    table_cell_advtab: true,
+                    table_row_advtab: true,
                   }}
-                  type='button'
-                >
-                  <i className='mdi mdi-download me-1'></i>
-                  Descargar HTML
-                </button>
-              }
+                  tabIndex={1}
+                  value={wysiwygContent}
+                  onEditorChange={(newValue) => processWywiwygContent(newValue)}
+                />
+                <div className='mb-2'></div>
+              </div>
+              <div className={`tab-pane ${typeEdition == 'code' ? 'active' : ''}`} id="code-editor">
+                <EditorFormGroup editorRef={codeEditorRef} onChange={e => setCodeContent(e.target.value)} />
+              </div>
+              <div className={`tab-pane ${typeEdition == 'dropzone' ? 'active' : ''}`} id="dropzone">
+                <div ref={ddRef} className='d-flex align-items-center justify-content-center mb-2 border' style={{
+                  height: '660px',
+                  borderRadius: '10px'
+                }}>
+                  <div>
+
+                    <input className='d-none' id='dropzone-file' type="file" accept='text/html,text/plain' onChange={(e) => {
+                      e.preventDefault()
+                      const files = [...e.target.files]
+                      e.target.value = null
+                      if (files.length == 0) return
+                      onDropzoneChange(files[0])
+                    }} />
+                    <label htmlFor="dropzone-file" className='d-block mx-auto mb-2 btn btn-sm btn-white rounded-pill waves-effect' style={{
+                      width: 'max-content'
+                    }}>
+                      <i className='mdi mdi-paperclip me-1'></i>
+                      Seleccionar archivo
+                    </label>
+                    <label htmlFor="dropzone-file" className='d-block' style={{ cursor: 'pointer' }}>
+                      Arrastra y suelta tu plantilla aquí, o haz clic para seleccionar tu archivo HTML.
+                    </label>
+                    {
+                      dropzoneContent?.trim() &&
+                      <button
+                        className='d-block mx-auto mt-2 btn btn-sm btn-primary rounded-pill waves-effect'
+                        onClick={() => {
+                          const blob = new Blob([dropzoneContent], { type: 'text/html' });
+                          const url = window.URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = 'template.html';
+                          a.click();
+                          window.URL.revokeObjectURL(url);
+                        }}
+                        type='button'
+                      >
+                        <i className='mdi mdi-download me-1'></i>
+                        Descargar HTML
+                      </button>
+                    }
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </Modal>
+    </form>
 
     <SendingModal modalRef={sendingModalRef} dataLoaded={dataLoaded} setDataLoaded={setDataLoaded} sessions={sessions} />
   </>

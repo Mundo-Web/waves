@@ -31,7 +31,7 @@ const EditorFormGroup = ({
       lineNumbers: true,
     });
 
-    editorInstance.current.setSize(null, 600);
+    editorInstance.current.setSize(null, 660);
 
     editorInstance.current.setValue(value);
 
