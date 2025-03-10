@@ -79,7 +79,7 @@ class SessionController extends BasicController
         $mail->SMTPAuth   = true;
         $mail->Username   = $session->metadata['email'];
         $mail->Password   = $session->metadata['password'];
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
         $mail->Port       = $session->metadata['type'] == 'gmail' ? $this->gmailPort : $session->metadata['port'];
 
         $mail->setFrom($session->metadata['email']);

@@ -74,7 +74,7 @@ class SendMessagesJob implements ShouldQueue
     $mail->SMTPAuth   = true;
     $mail->Username   = $sessionJpa->metadata['email'];
     $mail->Password   = $sessionJpa->metadata['password'];
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
     $mail->Port       = $sessionJpa->metadata['type'] == 'gmail'
       ? 587
       : $sessionJpa->metadata['port'];
