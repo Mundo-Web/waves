@@ -16,6 +16,7 @@ class History extends Model
     protected $fillable = [
         'session_id',
         'template_id',
+        'business_id',
         'name',
         'description',
         'type',
