@@ -22,9 +22,9 @@ return new class extends Migration
             $table->string('type');
             $table->json('mapping');
             $table->boolean('triggered')->default(false);
-            $table->integer('completed')->default(false);
-            $table->integer('failed')->default(false);
-            $table->integer('total')->default(false);
+            $table->integer('completed')->default(0);
+            $table->integer('failed')->default(0);
+            $table->integer('total')->default(0);
             $table->boolean('status')->nullable()->default(null);
 
             $table->timestamps();

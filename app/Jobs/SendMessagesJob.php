@@ -107,6 +107,7 @@ class SendMessagesJob implements ShouldQueue
       } catch (\Throwable $th) {
         $error = $th->getMessage();
       } finally {
+        $mail->clearAddresses();
         HistoryDetail::create([
           'history_id' => $historyJpa->id,
           'sent_to' => $email, 
