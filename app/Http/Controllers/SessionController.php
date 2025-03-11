@@ -131,13 +131,13 @@ class SessionController extends BasicController
           <tr>
             <td style="padding: 30px 20px; text-align: left;">
               <h1 style="margin: 0; font-size: 24px; color: #333333;">Ping</h1>
-              <p style="margin: 20px 0; font-size: 16px; line-height: 1.5; color: #555555;">Just checking in. Let me know if you need anything.</p>
+              <p style="margin: 20px 0; font-size: 16px; line-height: 1.5; color: #555555;">Solo quería pasar a saludar. Avísame si necesitas algo.</p>
             </td>
           </tr>
           <!-- Footer -->
           <tr>
             <td style="padding: 20px; text-align: left; border-top: 1px solid #eeeeee;">
-              <p style="margin: 0; font-size: 14px; color: #888888;">Regards,<br>Your Name</p>
+              <p style="margin: 0; font-size: 14px; color: #888888;">Saludos,<br>Atalaya Waves</p>
             </td>
           </tr>
         </table>
