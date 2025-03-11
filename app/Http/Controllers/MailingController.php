@@ -40,6 +40,8 @@ class MailingController extends Controller
         $mail->Subject = $subject;
         $mail->Body    = $body;
 
+        $mail->isHTML(true);
+
         try {
             $mail->send();
         } catch (\Throwable $th) {
