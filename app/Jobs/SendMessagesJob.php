@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Http\Classes\EmailConfig;
+use App\Http\Controllers\MailingController;
 use App\Models\History;
 use App\Models\HistoryDetail;
 use Illuminate\Bus\Queueable;
@@ -57,6 +58,8 @@ class SendMessagesJob implements ShouldQueue
       $historyJpa->save();
     } catch (\Throwable $th) {
       dump($th->getMessage());
+      $historyJpa->status = true;
+      $historyJpa->save();
     }
   }
 
@@ -64,26 +67,26 @@ class SendMessagesJob implements ShouldQueue
   {
     $historyJpa = $this->historyJpa;
 
-    // INICIO: SMTP Config
-    $encryption = PHPMailer::ENCRYPTION_STARTTLS;
-    if (
-      $sessionJpa->metadata['type'] != 'gmail' &&
-      $sessionJpa->metadata['encryption']
-    ) {
-      $encryption = $sessionJpa->metadata['encryption'] == 'ssl'
-        ? PHPMailer::ENCRYPTION_SMTPS
-        : PHPMailer::ENCRYPTION_STARTTLS;
-    }
-    $mail = new PHPMailer(true);
-    $mail->isSMTP();
-    $mail->Host       = $sessionJpa->metadata['type'] == 'gmail' ? 'smtp.gmail.com' : $sessionJpa->metadata['host'];
-    $mail->SMTPAuth   = true;
-    $mail->Username   = $sessionJpa->metadata['email'];
-    $mail->Password   = $sessionJpa->metadata['password'];
-    $mail->SMTPSecure = $encryption;
-    $mail->Port       = $sessionJpa->metadata['type'] == 'gmail' ? 587 : $sessionJpa->metadata['port'];
-    if (!$mail->smtpConnect()) throw new Exception('No se pudo conectar a SMTP');
-    // FIN: SMTP Config
+    // // INICIO: SMTP Config
+    // $encryption = PHPMailer::ENCRYPTION_STARTTLS;
+    // if (
+    //   $sessionJpa->metadata['type'] != 'gmail' &&
+    //   $sessionJpa->metadata['encryption']
+    // ) {
+    //   $encryption = $sessionJpa->metadata['encryption'] == 'ssl'
+    //     ? PHPMailer::ENCRYPTION_SMTPS
+    //     : PHPMailer::ENCRYPTION_STARTTLS;
+    // }
+    // $mail = new PHPMailer(true);
+    // $mail->isSMTP();
+    // $mail->Host       = $sessionJpa->metadata['type'] == 'gmail' ? 'smtp.gmail.com' : $sessionJpa->metadata['host'];
+    // $mail->SMTPAuth   = true;
+    // $mail->Username   = $sessionJpa->metadata['email'];
+    // $mail->Password   = $sessionJpa->metadata['password'];
+    // $mail->SMTPSecure = $encryption;
+    // $mail->Port       = $sessionJpa->metadata['type'] == 'gmail' ? 587 : $sessionJpa->metadata['port'];
+    // if (!$mail->smtpConnect()) throw new Exception('No se pudo conectar a SMTP');
+    // // FIN: SMTP Config
 
     foreach ($this->rows as $row) {
       $success = false;
@@ -100,12 +103,14 @@ class SendMessagesJob implements ShouldQueue
 
         $html = Text::replaceData($templateJpa->content, $data);
 
-        $mail->setFrom($sessionJpa->metadata['email']);
-        $mail->addAddress($email);
-        $mail->Subject = $templateJpa->name;
-        $mail->Body = $html;
-        $mail->isHTML(true);
-        $mail->send();
+        // $mail->setFrom($sessionJpa->metadata['email']);
+        // $mail->addAddress($email);
+        // $mail->Subject = $templateJpa->name;
+        // $mail->Body = $html;
+        // $mail->isHTML(true);
+        // $mail->send();
+
+        MailingController::send($sessionJpa, $email, $templateJpa->name, $html);
 
         $success = true;
         $error = null;
@@ -115,7 +120,7 @@ class SendMessagesJob implements ShouldQueue
         $error = $th->getMessage();
         $historyJpa->failed++;
       } finally {
-        $mail->clearAddresses();
+        // $mail->clearAddresses();
         $historyJpa->save();
         HistoryDetail::create([
           'history_id' => $historyJpa->id,
@@ -127,7 +132,7 @@ class SendMessagesJob implements ShouldQueue
       }
       break; // quitar esto si funciona
     }
-    $mail->smtpClose();
+    // $mail->smtpClose();
   }
 
   public function sendWhatsApp($sessionJpa, $templateJpa)

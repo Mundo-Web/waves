@@ -79,35 +79,73 @@ class SessionController extends BasicController
 
       if ($session->type == 'Email') {
 
-        $encryption = PHPMailer::ENCRYPTION_STARTTLS;
-        if (
-          $session->metadata['type'] != 'gmail' &&
-          $session->metadata['encryption']
-        ) {
-          $encryption = $session->metadata['encryption'] == 'ssl'
-            ? PHPMailer::ENCRYPTION_SMTPS
-            : PHPMailer::ENCRYPTION_STARTTLS;
-        }
+        // $encryption = PHPMailer::ENCRYPTION_STARTTLS;
+        // if (
+        //   $session->metadata['type'] != 'gmail' &&
+        //   $session->metadata['encryption']
+        // ) {
+        //   $encryption = $session->metadata['encryption'] == 'ssl'
+        //     ? PHPMailer::ENCRYPTION_SMTPS
+        //     : PHPMailer::ENCRYPTION_STARTTLS;
+        // }
 
-        $mail = new PHPMailer(true);
-        $mail->isSMTP();
-        $mail->Host       = $session->metadata['type'] == 'gmail' ? $this->gmailHost : $session->metadata['host'];
-        $mail->SMTPAuth   = true;
-        $mail->Username   = $session->metadata['email'];
-        $mail->Password   = $session->metadata['password'];
-        $mail->SMTPSecure = $encryption;
-        $mail->Port       = $session->metadata['type'] == 'gmail' ? $this->gmailPort : $session->metadata['port'];
+        // $mail = new PHPMailer(true);
+        // $mail->isSMTP();
+        // $mail->Host       = $session->metadata['type'] == 'gmail' ? $this->gmailHost : $session->metadata['host'];
+        // $mail->SMTPAuth   = true;
+        // $mail->Username   = $session->metadata['email'];
+        // $mail->Password   = $session->metadata['password'];
+        // $mail->SMTPSecure = $encryption;
+        // $mail->Port       = $session->metadata['type'] == 'gmail' ? $this->gmailPort : $session->metadata['port'];
 
-        $mail->setFrom($session->metadata['email']);
-        $mail->addAddress($to);
-        $mail->Subject = env('APP_NAME') . ' - Ping';
-        $mail->Body    = 'Pong';
+        // $mail->setFrom($session->metadata['email']);
+        // $mail->addAddress($to);
+        // $mail->Subject = env('APP_NAME') . ' - Ping';
+        // $mail->Body    = 'Pong';
 
-        try {
-          $mail->send();
-        } catch (Exception $e) {
-          throw new Exception('Error al enviar el correo: ' . $mail->ErrorInfo);
-        }
+        // try {
+        //   $mail->send();
+        // } catch (Exception $e) {
+        //   throw new Exception('Error al enviar el correo: ' . $mail->ErrorInfo);
+        // }
+
+        MailingController::send($session, $to, $session->name . ' - Ping', '<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ping</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #ffffff;">
+  <table role="presentation" style="width: 100%; border-collapse: collapse;">
+    <tr>
+      <td style="padding: 0;">
+        <table role="presentation" style="width: 100%; max-width: 600px; margin: 0 auto; border-collapse: collapse;">
+          <!-- Header -->
+          <tr>
+            <td style="padding: 20px 0; text-align: center;">
+              <div style="height: 4px; background-color: #3b82f6;"></div>
+            </td>
+          </tr>
+          <!-- Content -->
+          <tr>
+            <td style="padding: 30px 20px; text-align: left;">
+              <h1 style="margin: 0; font-size: 24px; color: #333333;">Ping</h1>
+              <p style="margin: 20px 0; font-size: 16px; line-height: 1.5; color: #555555;">Just checking in. Let me know if you need anything.</p>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 20px; text-align: left; border-top: 1px solid #eeeeee;">
+              <p style="margin: 0; font-size: 14px; color: #888888;">Regards,<br>Your Name</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>');
       } else {
         $res = new Fetch(env('WA_URL') . '/api/send', [
           'method' => 'POST',
