@@ -66,8 +66,13 @@ class SendMessagesJob implements ShouldQueue
 
     // INICIO: SMTP Config
     $encryption = PHPMailer::ENCRYPTION_STARTTLS;
-    if ($sessionJpa->metadata['type'] != 'gmail' && $sessionJpa->metadata['encryption']) {
-      $encryption = $sessionJpa->metadata['encryption'] == 'ssl' ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
+    if (
+      $sessionJpa->metadata['type'] != 'gmail' &&
+      $sessionJpa->metadata['encryption']
+    ) {
+      $encryption = $sessionJpa->metadata['encryption'] == 'ssl'
+        ? PHPMailer::ENCRYPTION_SMTPS
+        : PHPMailer::ENCRYPTION_STARTTLS;
     }
     $mail = new PHPMailer(true);
     // $mail->SMTPDebug = SMTP::DEBUG_SERVER;
@@ -108,10 +113,14 @@ class SendMessagesJob implements ShouldQueue
 
         $success = true;
         $error = null;
+
+        $historyJpa->completed++;
       } catch (\Throwable $th) {
         $error = $th->getMessage();
+        $historyJpa->failed++;
       } finally {
         $mail->clearAddresses();
+        $historyJpa->save();
         HistoryDetail::create([
           'history_id' => $historyJpa->id,
           'sent_to' => $email,
