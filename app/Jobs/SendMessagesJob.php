@@ -129,6 +129,7 @@ class SendMessagesJob implements ShouldQueue
           'error' => $error,
         ]);
       }
+      break;
     }
     $mail->smtpClose();
   }
