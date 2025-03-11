@@ -65,6 +65,10 @@ class SendMessagesJob implements ShouldQueue
     $historyJpa = $this->historyJpa;
 
     // INICIO: SMTP Config
+    $encryption = PHPMailer::ENCRYPTION_STARTTLS;
+    if ($sessionJpa->metadata['type'] != 'gmail' && $sessionJpa->metadata['encryption']) {
+      $encryption = $sessionJpa->metadata['encryption'] == 'ssl' ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
+    }
     $mail = new PHPMailer(true);
     // $mail->SMTPDebug = SMTP::DEBUG_SERVER;
     $mail->isSMTP();
@@ -74,7 +78,7 @@ class SendMessagesJob implements ShouldQueue
     $mail->SMTPAuth   = true;
     $mail->Username   = $sessionJpa->metadata['email'];
     $mail->Password   = $sessionJpa->metadata['password'];
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+    $mail->SMTPSecure = $encryption;
     $mail->Port       = $sessionJpa->metadata['type'] == 'gmail'
       ? 587
       : $sessionJpa->metadata['port'];
@@ -110,7 +114,7 @@ class SendMessagesJob implements ShouldQueue
         $mail->clearAddresses();
         HistoryDetail::create([
           'history_id' => $historyJpa->id,
-          'sent_to' => $email, 
+          'sent_to' => $email,
           'data' => $row,
           'status' => $success,
           'error' => $error,

@@ -39,12 +39,17 @@ class SessionController extends BasicController
       $session = Session::find($id);
 
       if ($session->type == 'Email') {
+        $encryption = PHPMailer::ENCRYPTION_STARTTLS;
+        if ($session->metadata['type'] != 'gmail' && $session->metadata['encryption']) {
+          $encryption = $session->metadata['encryption'] == 'ssl' ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
+        }
+
         $mail->isSMTP();
         $mail->Host       = $session->metadata['type'] == 'gmail' ? 'smtp.gmail.com' : $session->metadata['host'];
         $mail->SMTPAuth   = true;
         $mail->Username   = $session->metadata['email'];
         $mail->Password   = $session->metadata['password'];
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        $mail->SMTPSecure = $encryption;
         $mail->Port       = $session->metadata['type'] == 'gmail' ? 587 : $session->metadata['port'];
 
         if (!$mail->smtpConnect()) throw new Exception('No se pudo conectar a SMTP');
@@ -73,13 +78,19 @@ class SessionController extends BasicController
       if (!$session) throw new Exception('La sesion que intentas usar no existe');
 
       if ($session->type == 'Email') {
+
+        $encryption = PHPMailer::ENCRYPTION_STARTTLS;
+        if ($session->metadata['type'] != 'gmail' && $session->metadata['encryption']) {
+          $encryption = $session->metadata['encryption'] == 'ssl' ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
+        }
+
         $mail = new PHPMailer(true);
         $mail->isSMTP();
         $mail->Host       = $session->metadata['type'] == 'gmail' ? $this->gmailHost : $session->metadata['host'];
         $mail->SMTPAuth   = true;
         $mail->Username   = $session->metadata['email'];
         $mail->Password   = $session->metadata['password'];
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        $mail->SMTPSecure = $encryption;
         $mail->Port       = $session->metadata['type'] == 'gmail' ? $this->gmailPort : $session->metadata['port'];
 
         $mail->setFrom($session->metadata['email']);

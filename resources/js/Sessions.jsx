@@ -9,6 +9,7 @@ import SessionsRest from './actions/SessionsRest';
 import Adminto from './components/Adminto';
 import Modal from './components/Modal';
 import InputFormGroup from './components/form/InputFormGroup';
+import SelectFormGroup from './components/form/SelectFormGroup';
 import TextareaFormGroup from './components/form/TextareaFormGroup';
 import WhatsAppModal from './components/modals/WhatsAppModal';
 import googleSVG from './components/svg/google.svg';
@@ -36,6 +37,7 @@ const KPILeads = ({ sessions: sessionsDB = [] }) => {
   // Metadata Integration
   const intHostRef = useRef()
   const intPortRef = useRef()
+  const intEncryptionRef = useRef()
   const intEmailRef = useRef()
   const intPasswordRef = useRef()
 
@@ -63,6 +65,7 @@ const KPILeads = ({ sessions: sessionsDB = [] }) => {
     gmailPasswordRef.current.value = ''
     intHostRef.current.value = ''
     intPortRef.current.value = ''
+    $(intEncryptionRef.current).val('tls').trigger('change')
     intEmailRef.current.value = ''
     intPasswordRef.current.value = ''
 
@@ -76,6 +79,7 @@ const KPILeads = ({ sessions: sessionsDB = [] }) => {
       default:
         intHostRef.current.value = data?.metadata?.host ?? ''
         intPortRef.current.value = data?.metadata?.port ?? ''
+        $(intEncryptionRef.current).val(data?.metadata?.encryption ?? 'tls').trigger('change')
         intEmailRef.current.value = data?.metadata?.email ?? ''
         intPasswordRef.current.value = data?.metadata?.password ?? ''
         break;
@@ -110,6 +114,7 @@ const KPILeads = ({ sessions: sessionsDB = [] }) => {
       default:
         request.metadata.host = intHostRef.current.value
         request.metadata.port = intPortRef.current.value
+        request.metadata.encryption = $(intEncryptionRef.current).val()
         request.metadata.email = intEmailRef.current.value
         request.metadata.password = intPasswordRef.current.value
         break;
@@ -239,8 +244,12 @@ const KPILeads = ({ sessions: sessionsDB = [] }) => {
           <div className="tab-content">
             <div className={`tab-pane ${emailType == 'integration' ? 'active' : ''}`} id="email-integration">
               <div className="row">
-                <InputFormGroup eRef={intHostRef} label='Host' col='col-md-8' />
+                <InputFormGroup eRef={intHostRef} label='Host' />
                 <InputFormGroup eRef={intPortRef} label='Puerto' col='col-md-4' type='number' />
+                <SelectFormGroup eRef={intEncryptionRef} label="Seguridad" col='col-md-8' dropdownParent='#email-integration'>
+                  <option value="tls">TTLS</option>
+                  <option value="ssl">SMTPS</option>
+                </SelectFormGroup>
                 <InputFormGroup eRef={intEmailRef} label='Correo' />
                 <InputFormGroup eRef={intPasswordRef} label='Contraseña' />
               </div>
