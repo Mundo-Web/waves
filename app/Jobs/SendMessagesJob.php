@@ -75,18 +75,13 @@ class SendMessagesJob implements ShouldQueue
         : PHPMailer::ENCRYPTION_STARTTLS;
     }
     $mail = new PHPMailer(true);
-    // $mail->SMTPDebug = SMTP::DEBUG_SERVER;
     $mail->isSMTP();
-    $mail->Host       = $sessionJpa->metadata['type'] == 'gmail'
-      ? 'smtp.gmail.com'
-      : $sessionJpa->metadata['host'];
+    $mail->Host       = $sessionJpa->metadata['type'] == 'gmail' ? 'smtp.gmail.com' : $sessionJpa->metadata['host'];
     $mail->SMTPAuth   = true;
     $mail->Username   = $sessionJpa->metadata['email'];
     $mail->Password   = $sessionJpa->metadata['password'];
     $mail->SMTPSecure = $encryption;
-    $mail->Port       = $sessionJpa->metadata['type'] == 'gmail'
-      ? 587
-      : $sessionJpa->metadata['port'];
+    $mail->Port       = $sessionJpa->metadata['type'] == 'gmail' ? 587 : $sessionJpa->metadata['port'];
     if (!$mail->smtpConnect()) throw new Exception('No se pudo conectar a SMTP');
     // FIN: SMTP Config
 
@@ -105,6 +100,7 @@ class SendMessagesJob implements ShouldQueue
 
         $html = Text::replaceData($templateJpa->content, $data);
 
+        $mail->setFrom($sessionJpa->metadata['email']);
         $mail->addAddress($email);
         $mail->Subject = $templateJpa->name;
         $mail->Body = $html;
@@ -129,7 +125,7 @@ class SendMessagesJob implements ShouldQueue
           'error' => $error,
         ]);
       }
-      break;
+      break; // quitar esto si funciona
     }
     $mail->smtpClose();
   }

@@ -80,8 +80,13 @@ class SessionController extends BasicController
       if ($session->type == 'Email') {
 
         $encryption = PHPMailer::ENCRYPTION_STARTTLS;
-        if ($session->metadata['type'] != 'gmail' && $session->metadata['encryption']) {
-          $encryption = $session->metadata['encryption'] == 'ssl' ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
+        if (
+          $session->metadata['type'] != 'gmail' &&
+          $session->metadata['encryption']
+        ) {
+          $encryption = $session->metadata['encryption'] == 'ssl'
+            ? PHPMailer::ENCRYPTION_SMTPS
+            : PHPMailer::ENCRYPTION_STARTTLS;
         }
 
         $mail = new PHPMailer(true);
