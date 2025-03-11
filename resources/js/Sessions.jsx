@@ -246,7 +246,7 @@ const KPILeads = ({ sessions: sessionsDB = [] }) => {
               <div className="row">
                 <InputFormGroup eRef={intHostRef} label='Host' />
                 <InputFormGroup eRef={intPortRef} label='Puerto' col='col-md-4' type='number' />
-                <SelectFormGroup eRef={intEncryptionRef} label="Seguridad" col='col-md-8' dropdownParent='#email-integration'>
+                <SelectFormGroup eRef={intEncryptionRef} label="Seguridad" col='col-md-8' dropdownParent='#email-integration' minimumResultsForSearch={-1}>
                   <option value="tls">TTLS</option>
                   <option value="ssl">SMTPS</option>
                 </SelectFormGroup>
