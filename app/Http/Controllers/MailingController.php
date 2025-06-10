@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Session;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\View;
 use PHPMailer\PHPMailer\PHPMailer;
+use SoDe\Extend\Text;
 
 class MailingController extends Controller
 {
@@ -13,7 +15,7 @@ class MailingController extends Controller
     static int $GMAIL_PORT = 587;
     static string $GMAIL_ENCRYPTION = PHPMailer::ENCRYPTION_STARTTLS;
 
-    public static function send(Session $session, $to, $subject, $body)
+    public static function send(Session $session, $to, $subject, $body = '')
     {
 
         $encryption = MailingController::$GMAIL_ENCRYPTION;
@@ -38,6 +40,11 @@ class MailingController extends Controller
         $mail->setFrom($session->metadata['email']);
         $mail->addAddress($to);
         $mail->Subject = $subject;
+
+        if (Text::startsWith($body, 'view:')) {
+            $view = explode(':', $body)[1];
+            $body = View::make($body)->render();
+        }
         $mail->Body    = $body;
 
         $mail->isHTML(true);
