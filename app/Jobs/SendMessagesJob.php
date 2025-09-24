@@ -202,7 +202,9 @@ class SendMessagesJob implements ShouldQueue
 
         if (!$res->ok) {
           $data = JSON::parseable($res->text());
-          throw new Exception($data['response']['message'][0] ?? 'Error desconocido');
+          throw new Exception(is_array($data['response']['message']) 
+            ? implode(', ', $data['response']['message']) 
+            : ($data['response']['message'] ?? 'Error desconocido'));
         }
 
         $success = true;
