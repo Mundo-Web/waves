@@ -141,6 +141,8 @@ const KPILeads = ({ sessions: sessionsDB = [] }) => {
     sessionIdRef.current.value = data.id
     sessionNameRef.current.textContent = data.name
 
+    console.log(data)
+
     if (data.type == 'Email') {
       sessionEmailFromRef.current.value = data.metadata.email
       sessionEmailToRef.current.value = ''

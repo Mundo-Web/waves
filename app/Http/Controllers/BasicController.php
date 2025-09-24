@@ -276,6 +276,7 @@ class BasicController extends Controller
         $full = $request->file($field);
         $uuid = Crypto::randomUUID();
         $ext = $full->getClientOriginalExtension();
+        if (!$ext) $ext = File::getExtention($full->getMimeType());
         $path = $this->publicMedia
           ? public_path("TEMP/{$snake_case}")
           : storage_path("app/images/{$snake_case}");

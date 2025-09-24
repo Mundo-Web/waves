@@ -8,27 +8,27 @@ import Global from "../../Utils/Global";
 
 const WhatsAppModal = ({ modalRef, dataLoaded, onReady }) => {
   const qrRef = useRef()
-  const phoneRef = useRef()
 
   const [status, setStatus] = useState('verifying')
   const { color, icon, text } = WhatsAppStatuses[status]
   const [percent, setPercent] = useState(0)
   const [sessionInfo, setSessionInfo] = useState({})
 
-  const businessSession = `${Global.APP_CORRELATIVE}-${dataLoaded?.id}`
-
   useEffect(() => {
     if (!dataLoaded) return
     if (status == 'verifying') {
       const searchParams = new URLSearchParams({
-        session: businessSession
+        session: dataLoaded?.id
       })
 
-      let eventSource = new EventSource(`${Global.WA_URL}/api/session/verify?${searchParams}`)
+      let eventSource = new EventSource(`/api/whatsapp/verify?${searchParams}`)
       eventSource.onmessage = ({ data }) => {
         if (data == 'ping') return console.log('Realtime active')
         const { status, qr, percent, info } = JSON.parse(data)
         switch (status) {
+          case 'ping':
+            console.log('Evento del servidor')
+            break;
           case 'qr':
             setStatus('qr')
             $(qrRef.current).empty()
@@ -53,7 +53,7 @@ const WhatsAppModal = ({ modalRef, dataLoaded, onReady }) => {
               id: dataLoaded.id,
               metadata: {
                 name: info.pushname,
-                email: info.me._serialized,
+                email: `${info.me.user}@${info.me.server}`,
                 phone: info.me.user
               }
             })
@@ -92,7 +92,7 @@ const WhatsAppModal = ({ modalRef, dataLoaded, onReady }) => {
       cancelButtonText: `Cancelar`
     })
     if (!isConfirmed) return
-    await fetch(`${Global.WA_URL}/api/session/${businessSession}`, {
+    await fetch(`${Global.WA_URL}/api/session/${dataLoaded?.id}`, {
       method: 'DELETE'
     })
     Notify.add({

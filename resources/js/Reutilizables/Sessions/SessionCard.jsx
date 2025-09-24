@@ -64,11 +64,11 @@ const SessionCard = ({ onModalOpen, onPingModalOpen, onWhatsAppModalOpen, ...ses
                 <i className='mdi mdi-pencil'></i>
               </button>
             </Tippy>
-            <Tippy content='Desactivar'>
+            {/* <Tippy content='Desactivar'>
               <button className='btn btn-xs btn-light rounded-pill waves-effect'>
                 <i className='mdi mdi-toggle-switch text-success'></i>
               </button>
-            </Tippy>
+            </Tippy> */}
           </div>
         </div>
       </div>

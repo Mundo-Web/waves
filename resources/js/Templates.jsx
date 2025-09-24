@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import CreateReactScript from './Utils/CreateReactScript.jsx'
@@ -29,6 +28,7 @@ const Templates = ({ TINYMCE_KEY, sessions }) => {
 
   const gridRef = useRef()
   const modalRef = useRef()
+  const whatsappModalRef = useRef()
   const sendingModalRef = useRef()
   const ddRef = useRef()
 
@@ -40,13 +40,16 @@ const Templates = ({ TINYMCE_KEY, sessions }) => {
   const typeRef = useRef()
   const nameRef = useRef()
   const descriptionRef = useRef()
+  const messageRef = useRef()
+  const attachmentRef = useRef()
+  const attachmentUrlRef = useRef()
 
   const [dataLoaded, setDataLoaded] = useState(null)
-
   const [isEditing, setIsEditing] = useState(false)
   const [isDesigning, setIsDesigning] = useState(false)
   const [templateActive, setTemplateActive] = useState({})
   const [typeEdition, setTypeEdition] = useState('wysiwyg')
+  const [attachment, setAttachment] = useState(null)
 
   // Content Statuses
   const [wysiwygContent, setWysiwygContent] = useState('')
@@ -65,19 +68,23 @@ const Templates = ({ TINYMCE_KEY, sessions }) => {
     $(modalRef.current).modal('show')
   }
 
-  const onEditorModalOpen = async (data) => {
+  const onWhatsAppModalOpen = async (data) => {
     const result = await templatesRest.get(data.id)
-    setTemplateActive(result);
-    setTypeEdition('wysiwyg')
-    setWysiwygContent(result?.content ?? '<i>- Agrega tu contenido aqui -</i>');
-    setIsDesigning(true)
+    setTemplateActive(result)
+    messageRef.current.value = result?.content || ''
+    attachmentRef.current.value = ''
+    attachmentUrlRef.current.value = ''
+    attachmentUrlRef.current.originalValue = ''
+    if (result?.attachment) setAttachment(result.attachment)
+
+    $(whatsappModalRef.current).modal('show')
   }
 
   const onModalSubmit = async (e) => {
     e.preventDefault()
 
     const request = {
-      id: idRef.current.value || undefined,
+      id: idRef.current.value,
       type: typeRef.current.value,
       name: nameRef.current.value,
       description: descriptionRef.current.value,
@@ -105,81 +112,66 @@ const Templates = ({ TINYMCE_KEY, sessions }) => {
     if (!result) return
   }
 
-  const onStatusChange = async ({ id, status }) => {
-    const result = await templatesRest.status({ id, status })
-    if (!result) return
-    $(gridRef.current).dxDataGrid('instance').refresh()
-  }
+  const onWhatsAppModalSubmit = async (e) => {
+    e.preventDefault()
 
-  const onDeleteClicked = async (id) => {
-    const { isConfirmed } = await Swal.fire({
-      title: 'Eliminar registro',
-      text: '¿Está seguro de eliminar este registro?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Si, eliminar!',
-      cancelButtonText: 'Cancelar'
-    })
-    if (!isConfirmed) return
-    const result = await templatesRest.delete(id)
-    if (!result) return
-    $(gridRef.current).dxDataGrid('instance').refresh()
-  }
+    let attachment = null
+    if (attachmentRef.current.files.length > 0) {
+      const formData = new FormData()
+      formData.append('file', attachmentRef.current.files[0])
+      const result = await repositoryRest.save(formData)
+      attachment = result.url
+    } else if (attachmentUrlRef.current.value) {
+      try {
+        const response = await fetch(attachmentUrlRef.current.value)
+        if (!response.ok) throw new Error('Failed to fetch image')
 
-  const onTypeEditionClicked = (newType) => {
-    setTypeEdition(old => {
-      if (old == 'wysiwyg' && newType == 'code') {
-        codeEditorRef.current.setValue(html_beautify(wysiwygContent, {
-          indent_empty_lines: true,
-          preserve_newlines: true,
-          max_preserve_newlines: 1,
-          indent_size: 2
-        }))
-        setTimeout(() => {
-          codeEditorRef.current.refresh()
-        }, 125);
-      } else if (old == 'wysiwyg' && newType == 'dropzone') {
-        setDropzoneContent(wysiwygContent)
-      } else if (old == 'code' && newType == 'wysiwyg') {
-        setWysiwygContent(codeContent)
-      } else if (old == 'code' && newType == 'dropzone') {
-        setDropzoneContent(codeContent)
-      } else if (old == 'dropzone' && newType == 'wysiwyg') {
-        setWysiwygContent(dropzoneContent)
-      } else if (old == 'dropzone' && newType == 'code') {
-        codeEditorRef.current.setValue(html_beautify(dropzoneContent, {
-          indent_empty_lines: true,
-          preserve_newlines: true,
-          max_preserve_newlines: 1,
-          indent_size: 2
-        }))
-        setTimeout(() => {
-          codeEditorRef.current.refresh()
-        }, 125);
+        const blob = await response.blob()
+        const file = new File([blob], 'attachment', { type: blob.type })
+        const formData = new FormData()
+        formData.append('file', file)
+        const result = await repositoryRest.save(formData)
+        attachment = result.url
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al obtener el adjunto',
+          text: 'No se pudo obtener el archivo adjunto desde la URL proporcionada. Por favor, intente descargar el archivo desde su navegador y súbalo como archivo adjunto.',
+          confirmButtonText: 'Entendido'
+        })
+        return
       }
-      return newType
-    })
-  }
+    }
 
-  const onDropzoneChange = (file) => {
-    file.text().then(content => {
-      const container = $(`<body>`).html(content)
+    const content = messageRef.current.value
+    const request = {
+      id: templateActive.id,
+      content,
+      attachment: attachment || undefined,
+      vars: content.match(/{{([^}]+)}}/g)?.map(match => match.slice(2, -2)) || [],
+    }
 
-      container.find('style').remove()
-      container.find('script').remove()
-      container.find('meta').remove()
-      container.find('title').remove()
-      container.find('link').remove()
+    const result = await templatesRest.save(request)
+    if (!result) return
 
-      setDropzoneContent(container.html().trim())
-    })
+    $(whatsappModalRef.current).modal('hide')
   }
 
   const onSendingModalClicked = async (data) => {
     const result = await templatesRest.get(data.id)
     setDataLoaded(result)
+  }
+  const onEditorModalOpen = async (data) => {
+    if (data.type === 'WhatsApp') {
+      onWhatsAppModalOpen(data)
+      return
+    }
+
+    const result = await templatesRest.get(data.id)
+    setTemplateActive(result);
+    setTypeEdition('wysiwyg')
+    setWysiwygContent(result?.content ?? '<i>- Agrega tu contenido aqui -</i>');
+    setIsDesigning(true)
   }
 
   useEffect(() => {
@@ -244,6 +236,10 @@ const Templates = ({ TINYMCE_KEY, sessions }) => {
           }))
         }}
         columns={[
+          {
+            dataField: 'type',
+            caption: 'Tipo'
+          },
           {
             dataField: 'name',
             caption: 'Nombre',
@@ -428,6 +424,33 @@ const Templates = ({ TINYMCE_KEY, sessions }) => {
       </div>
     </form>
 
+    {/* WhatsApp Template Modal */}
+    <Modal modalRef={whatsappModalRef} title="Diseñar plantilla WhatsApp" onSubmit={onWhatsAppModalSubmit}>
+      <div className="row">
+        <TextareaFormGroup eRef={messageRef} label="Mensaje" required />
+        <div className="col-12">
+          <div className="form-group">
+            <label className='form-label'>Adjunto (opcional)</label>
+            <div className={`${attachment ? 'd-flex' : 'd-none'} align-items-center gap-2 border rounded p-2`}>
+              <i className="mdi mdi-file-document-outline"></i>
+              <span className="flex-grow-1">{attachment?.split('/').pop()}</span>
+              <button
+                type="button"
+                className="btn btn-sm btn-soft-danger"
+                onClick={() => setAttachment(null)}
+              >
+                <i className="mdi mdi-close"></i>
+              </button>
+            </div>
+            <div hidden={!!attachment}>
+              <input ref={attachmentRef} type="file" className="form-control mb-2" />
+              <small className="text-muted form-label">O ingresa una URL:</small>
+              <input ref={attachmentUrlRef} type="url" className="form-control" placeholder="https://" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </Modal>
     <SendingModal modalRef={sendingModalRef} dataLoaded={dataLoaded} setDataLoaded={setDataLoaded} sessions={sessions} />
   </>
   )

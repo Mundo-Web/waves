@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Http\Classes\EmailConfig;
 use App\Http\Controllers\MailingController;
+use App\Models\Atalaya\Business;
 use App\Models\History;
 use App\Models\HistoryDetail;
 use Illuminate\Bus\Queueable;
@@ -16,6 +17,7 @@ use App\Models\Session;
 use App\Models\Template;
 use App\Models\User;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use PHPMailer\PHPMailer\PHPMailer;
 use SoDe\Extend\Fetch;
 use SoDe\Extend\JSON;
@@ -150,23 +152,57 @@ class SendMessagesJob implements ShouldQueue
           $data[$var] = $row[$historyJpa->mapping[$var]];
         }
 
-        $html = Text::replaceData($templateJpa->content, $data);
+        $content = Text::replaceData($templateJpa->content, $data);
 
-        $res = new Fetch(env('WA_URL') . '/api/send', [
-          'method' => 'POST',
-          'headers' => [
-            'Content-Type' => 'application/json'
-          ],
-          'body' => [
-            'from' => env('APP_CORRELATIVE') . '-' . $sessionJpa->id,
-            'to' => [$phone],
-            'html' => $html,
-          ]
-        ]);
+        $businessJpa = Business::with(['person'])->find(Auth::user()->business_id);
+        $instanceName = $businessJpa->person->document_number . '-' . $sessionJpa->id;
+
+        // Determine if we should use sendMedia or sendText based on attachment
+        if ($templateJpa->attachment) {
+          $res = new Fetch(env('APP_URL') . '/' . $templateJpa->attachment);
+
+          $mimetype = $res->contentType ?? 'application/octet-stream';
+          $mediaType = 'document';
+          if (str_starts_with($mimetype, 'image/')) {
+            $mediaType = 'image';
+          } else if (str_starts_with($mimetype, 'video/')) {
+            $mediaType = 'video';
+          }
+
+          $body = [
+            'number' => $phone,
+            'mediatype' => $mediaType,
+            'mimetype' => $mimetype,
+            'caption' => $content,
+            'media' => env('APP_URL') . '/' . $templateJpa->attachment,
+            'fileName' => basename($templateJpa->attachment),
+          ];
+
+          $res = new Fetch(env('EVOAPI_URL') . '/message/sendMedia/' . $instanceName, [
+            'method' => 'POST',
+            'headers' => [
+              'Content-Type' => 'application/json',
+              'apikey' => $businessJpa->uuid
+            ],
+            'body' => $body
+          ]);
+        } else {
+          $res = new Fetch(env('EVOAPI_URL') . '/message/sendText/' . $instanceName, [
+            'method' => 'POST',
+            'headers' => [
+              'Content-Type' => 'application/json',
+              'apikey' => $businessJpa->uuid
+            ],
+            'body' => [
+              'number' => $phone,
+              'text' => $content
+            ]
+          ]);
+        }
 
         if (!$res->ok) {
           $data = JSON::parseable($res->text());
-          throw new Exception($data['message'] ?? 'Error desconocido');
+          throw new Exception($data['response']['message'][0] ?? 'Error desconocido');
         }
 
         $success = true;

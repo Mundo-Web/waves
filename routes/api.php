@@ -33,6 +33,7 @@ use App\Http\Controllers\UserByProjectController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UtilController;
 use App\Http\Controllers\ViewController;
+use App\Http\Controllers\WhatsAppController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -70,6 +71,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/sessions/paginate', [SessionController::class, 'paginate']);
     Route::patch('/sessions/status', [SessionController::class, 'status']);
     Route::delete('/sessions/{id}', [SessionController::class, 'delete']);
+
+    Route::get('/whatsapp', [WhatsAppController::class, 'verify']);
+    Route::get('/whatsapp/verify', [WhatsAppController::class, 'stream']);
+    Route::post('/whatsapp/send', [WhatsAppController::class, 'send']);
+    Route::delete('/whatsapp', [WhatsAppController::class, 'close']);
 
     // Templates Routes
     Route::get('/templates/{id}', [TemplateController::class, 'get']);

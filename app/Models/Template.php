@@ -19,6 +19,7 @@ class Template extends Model
         'type',
         'content',
         'vars',
+        'attachment',
         'business_id',
         'status',
     ];
