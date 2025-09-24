@@ -167,7 +167,7 @@ const SendingModal = ({ modalRef, dataLoaded, setDataLoaded, sessions }) => {
                   }))}
                   required
                 >
-                  <option value="">Select session</option>
+                  <option value="">Seleccionar sesión</option>
                   {sessions
                     .filter(session => session.type === dataLoaded?.type)
                     .map((session, idx) => (
@@ -176,7 +176,7 @@ const SendingModal = ({ modalRef, dataLoaded, setDataLoaded, sessions }) => {
                 </select>
               </div>
               <div className="mb-0">
-                <label className="form-label">Enviar correo a <b className="text-danger">*</b></label>
+                <label className="form-label">Enviar mensaje a <b className="text-danger">*</b></label>
                 <select
                   className="form-select form-select-sm"
                   value={variableMappings['waves_send_to']}
@@ -186,7 +186,7 @@ const SendingModal = ({ modalRef, dataLoaded, setDataLoaded, sessions }) => {
                   }))}
                   required
                 >
-                  <option value="">Select column</option>
+                  <option value="">Seleccionar columna</option>
                   {columnHeaders.map((header, idx) => (
                     <option key={idx} value={header}>{header}</option>
                   ))}
