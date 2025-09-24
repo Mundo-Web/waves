@@ -168,9 +168,11 @@ const SendingModal = ({ modalRef, dataLoaded, setDataLoaded, sessions }) => {
                   required
                 >
                   <option value="">Select session</option>
-                  {sessions.map((session, idx) => (
-                    <option key={idx} value={session.id}>{session.name}</option>
-                  ))}
+                  {sessions
+                    .filter(session => session.type === dataLoaded?.type)
+                    .map((session, idx) => (
+                      <option key={idx} value={session.id}>{session.name}</option>
+                    ))}
                 </select>
               </div>
               <div className="mb-0">
