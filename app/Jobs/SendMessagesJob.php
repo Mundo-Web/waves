@@ -139,6 +139,26 @@ class SendMessagesJob implements ShouldQueue
   public function sendWhatsApp($sessionJpa, $templateJpa)
   {
     $historyJpa = $this->historyJpa;
+    $businessJpa = Business::with(['person'])->find(Auth::user()->business_id);
+
+    // Get attachment details once before the loop if it exists
+    $attachmentDetails = null;
+    if ($templateJpa->attachment) {
+      $res = new Fetch(env('APP_URL') . '/' . $templateJpa->attachment);
+      $mimetype = $res->contentType ?? 'application/octet-stream';
+      $mediaType = 'document';
+      if (str_starts_with($mimetype, 'image/')) {
+        $mediaType = 'image';
+      } else if (str_starts_with($mimetype, 'video/')) {
+        $mediaType = 'video';
+      }
+      $attachmentDetails = [
+        'mediatype' => $mediaType,
+        'mimetype' => $mimetype,
+        'media' => env('APP_URL') . '/' . $templateJpa->attachment,
+        'fileName' => basename($templateJpa->attachment)
+      ];
+    }
 
     foreach ($this->rows as $row) {
       $success = false;
@@ -153,30 +173,13 @@ class SendMessagesJob implements ShouldQueue
         }
 
         $content = Text::replaceData($templateJpa->content, $data);
-
-        $businessJpa = Business::with(['person'])->find(Auth::user()->business_id);
         $instanceName = $businessJpa->person->document_number . '-' . $sessionJpa->id;
 
-        // Determine if we should use sendMedia or sendText based on attachment
-        if ($templateJpa->attachment) {
-          $res = new Fetch(env('APP_URL') . '/' . $templateJpa->attachment);
-
-          $mimetype = $res->contentType ?? 'application/octet-stream';
-          $mediaType = 'document';
-          if (str_starts_with($mimetype, 'image/')) {
-            $mediaType = 'image';
-          } else if (str_starts_with($mimetype, 'video/')) {
-            $mediaType = 'video';
-          }
-
-          $body = [
+        if ($attachmentDetails) {
+          $body = array_merge($attachmentDetails, [
             'number' => $phone,
-            'mediatype' => $mediaType,
-            'mimetype' => $mimetype,
-            'caption' => $content,
-            'media' => env('APP_URL') . '/' . $templateJpa->attachment,
-            'fileName' => basename($templateJpa->attachment),
-          ];
+            'caption' => $content
+          ]);
 
           $res = new Fetch(env('EVOAPI_URL') . '/message/sendMedia/' . $instanceName, [
             'method' => 'POST',
@@ -202,8 +205,8 @@ class SendMessagesJob implements ShouldQueue
 
         if (!$res->ok) {
           $data = JSON::parseable($res->text());
-          throw new Exception(is_array($data['response']['message']) 
-            ? implode(', ', $data['response']['message']) 
+          throw new Exception(is_array($data['response']['message'])
+            ? implode(', ', $data['response']['message'])
             : ($data['response']['message'] ?? 'Error desconocido'));
         }
 
