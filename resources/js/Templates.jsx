@@ -49,7 +49,10 @@ const Templates = ({ TINYMCE_KEY, sessions }) => {
   const [isDesigning, setIsDesigning] = useState(false)
   const [templateActive, setTemplateActive] = useState({})
   const [typeEdition, setTypeEdition] = useState('wysiwyg')
+
+  const [message, setMessage] = useState('')
   const [attachment, setAttachment] = useState(null)
+  const [attachmentPreview, setAttachmentPreview] = useState(null)
 
   // Content Statuses
   const [wysiwygContent, setWysiwygContent] = useState('')
@@ -72,10 +75,12 @@ const Templates = ({ TINYMCE_KEY, sessions }) => {
     const result = await templatesRest.get(data.id)
     setTemplateActive(result)
     messageRef.current.value = result?.content || ''
+    setMessage(result?.content || '')
     attachmentRef.current.value = ''
     attachmentUrlRef.current.value = ''
     attachmentUrlRef.current.originalValue = ''
     if (result?.attachment) setAttachment(result.attachment)
+    else setAttachment(null)
 
     $(whatsappModalRef.current).modal('show')
   }
@@ -215,6 +220,40 @@ const Templates = ({ TINYMCE_KEY, sessions }) => {
       setWysiwygContent(newContent)
     }
   }
+
+  useEffect(() => {
+    if (!attachment) {
+      setAttachmentPreview(null)
+      return
+    }
+
+    // Check if attachment is a URL
+    if (attachment.startsWith('TEMP/') || attachment.startsWith('http')) {
+      fetch(attachment.startsWith('TEMP/') ? `/${attachment}` : attachment)
+        .then(response => response.blob())
+        .then(blob => {
+          if (blob.type.startsWith('image/')) {
+            setAttachmentPreview(URL.createObjectURL(blob))
+          } else {
+            setAttachmentPreview(null)
+          }
+        })
+        .catch(() => setAttachmentPreview(null))
+      return
+    }
+
+    // Check if attachment is a File object
+    if (attachment instanceof File) {
+      if (attachment.type.startsWith('image/')) {
+        setAttachmentPreview(URL.createObjectURL(attachment))
+      } else {
+        setAttachmentPreview(null)
+      }
+      return
+    }
+
+    setAttachmentPreview(null)
+  }, [attachment])
 
   return (<>
     <div hidden={isDesigning}>
@@ -425,29 +464,92 @@ const Templates = ({ TINYMCE_KEY, sessions }) => {
     </form>
 
     {/* WhatsApp Template Modal */}
-    <Modal modalRef={whatsappModalRef} title="Diseñar plantilla WhatsApp" onSubmit={onWhatsAppModalSubmit}>
+    <Modal modalRef={whatsappModalRef} title="Diseñar plantilla WhatsApp" onSubmit={onWhatsAppModalSubmit} size='lg'>
       <div className="row">
-        <TextareaFormGroup eRef={messageRef} label="Mensaje" required />
-        <div className="col-12">
-          <div className="form-group">
-            <label className='form-label'>Adjunto (opcional)</label>
-            <div className={`${attachment ? 'd-flex' : 'd-none'} align-items-center gap-2 border rounded p-2`}>
-              <i className="mdi mdi-file-document-outline"></i>
-              <span className="flex-grow-1">{attachment?.split('/').pop()}</span>
-              <button
-                type="button"
-                className="btn btn-sm btn-soft-danger"
-                onClick={() => setAttachment(null)}
-              >
-                <i className="mdi mdi-close"></i>
-              </button>
-            </div>
-            <div hidden={!!attachment}>
-              <input ref={attachmentRef} type="file" className="form-control mb-2" />
-              <small className="text-muted form-label">O ingresa una URL:</small>
-              <input ref={attachmentUrlRef} type="url" className="form-control" placeholder="https://" />
+        <div className="col-md-6">
+          <div className="row">
+            <TextareaFormGroup eRef={messageRef} label="Mensaje" required onChange={e => setMessage(e.target.value)} />
+            <div className="col-12">
+              <div className="form-group">
+                <label className='form-label'>Adjunto (opcional)</label>
+                <div className={`${attachment ? 'd-flex' : 'd-none'} align-items-center gap-2 border rounded p-2`}>
+                  <i className="mdi mdi-file-document-outline"></i>
+                  <span className="flex-grow-1">attachment</span>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-soft-danger"
+                    onClick={() => setAttachment(null)}
+                  >
+                    <i className="mdi mdi-close"></i>
+                  </button>
+                </div>
+                <div className={attachment ? 'd-none' : 'd-block'}>
+                  <input ref={attachmentRef} type="file" className="form-control mb-2" onChange={e => setAttachment(URL.createObjectURL(e.target.files[0]))} />
+                  <small className="text-muted form-label">O ingresa una URL:</small>
+                  <input ref={attachmentUrlRef} type="url" className="form-control" placeholder="https://" onChange={e => setAttachment(e.target.value)} />
+                </div>
+              </div>
             </div>
           </div>
+        </div>
+        <div className="col-md-6">
+          <ul className="conversation-list slimscroll rounded" style={{ maxHeight: '410px', backgroundColor: '#ebeff2' }} data-simplebar="init">
+            <div className="simplebar-wrapper" style={{ margin: '0px' }} bis_skin_checked="1">
+              <div className="simplebar-height-auto-observer-wrapper" bis_skin_checked="1">
+                <div className="simplebar-height-auto-observer" bis_skin_checked="1">
+                </div>
+              </div>
+              <div className="simplebar-mask" bis_skin_checked="1">
+                <div className="simplebar-offset" style={{ right: '0px', bottom: '0px' }} bis_skin_checked="1">
+                  <div className="simplebar-content-wrapper" style={{ height: 'auto', overflow: 'hidden scroll' }} bis_skin_checked="1">
+                    <div className="simplebar-content" style={{ padding: '0px' }} bis_skin_checked="1">
+                      <li>
+                        <div className="message-list mt-2" bis_skin_checked="1">
+                          <div className="conversation-text" bis_skin_checked="1">
+                            <div className="ctext-wrap" bis_skin_checked="1">
+                              <p>
+                                Hola!
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </li>
+
+                      <li className="odd">
+                        <div className="message-list" bis_skin_checked="1">
+                          <div className="conversation-text" bis_skin_checked="1">
+                            <div className="ctext-wrap" bis_skin_checked="1" style={{ backgroundColor: '#fff' }}>
+                              {attachmentPreview ? (
+                                <div className="attachment-preview mb-2">
+                                  <img src={attachmentPreview} alt="Preview" className="img-fluid rounded w-100" style={{ maxHeight: '200px', objectFit: 'cover', objectPosition: 'center' }} />
+                                </div>
+                              ) : attachment && (
+                                <div className="attachment-preview mb-2 rounded" style={{ backgroundColor: '#f8f9fa' }}>
+                                  <div className="d-flex align-items-center justify-content-between gap-2 bg-light rounded p-2">
+                                    <i className="mdi mdi-file-document-outline text-primary"></i>
+                                    <span className="flex-grow-1 text-truncate text-start">attachment</span>
+                                    <i className="mdi mdi-download text-muted"></i>
+                                  </div>
+                                </div>
+                              )}
+                              <p>{message}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </li>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="simplebar-placeholder" style={{ width: 'auto', height: '606px' }} bis_skin_checked="1"> </div>
+            </div>
+            <div className="simplebar-track simplebar-horizontal" style={{ visibility: 'hidden' }} bis_skin_checked="1">
+              <div className="simplebar-scrollbar" style={{ width: '0px', display: 'none' }} bis_skin_checked="1"></div>
+            </div>
+            <div className="simplebar-track simplebar-vertical" style={{ visibility: 'visible' }} bis_skin_checked="1">
+              <div className="simplebar-scrollbar" style={{ height: '277px', transform: 'translate3d(0px, 133px, 0px); display: block' }} bis_skin_checked="1"></div>
+            </div>
+          </ul>
         </div>
       </div>
     </Modal>

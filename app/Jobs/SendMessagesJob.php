@@ -20,6 +20,7 @@ use Exception;
 use Illuminate\Support\Facades\Auth;
 use PHPMailer\PHPMailer\PHPMailer;
 use SoDe\Extend\Fetch;
+use SoDe\Extend\File;
 use SoDe\Extend\JSON;
 use SoDe\Extend\Text;
 
@@ -152,11 +153,12 @@ class SendMessagesJob implements ShouldQueue
       } else if (str_starts_with($mimetype, 'video/')) {
         $mediaType = 'video';
       }
+      $extension = File::getExtention($mimetype);
       $attachmentDetails = [
         'mediatype' => $mediaType,
         'mimetype' => $mimetype,
         'media' => env('APP_URL') . '/' . $templateJpa->attachment,
-        'fileName' => basename($templateJpa->attachment)
+        'fileName' => 'attachment.' . $extension,
       ];
     }
 

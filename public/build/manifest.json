@@ -195,8 +195,8 @@
       "_Adminto-Do8tLT0J.js"
     ]
   },
-  "_TextareaFormGroup-tR55Sx8T.js": {
-    "file": "assets/TextareaFormGroup-tR55Sx8T.js",
+  "_TextareaFormGroup-BpqcCay1.js": {
+    "file": "assets/TextareaFormGroup-BpqcCay1.js",
     "name": "TextareaFormGroup",
     "imports": [
       "_CreateReactScript-CVY3HzKt.js"
@@ -298,7 +298,7 @@
     ]
   },
   "resources/js/Clients.jsx": {
-    "file": "assets/Clients-he2J-GUJ.js",
+    "file": "assets/Clients-Begd4dzY.js",
     "name": "Clients",
     "src": "resources/js/Clients.jsx",
     "isEntry": true,
@@ -308,7 +308,7 @@
       "_Modal-B5WsfZSb.js",
       "_ProductsByClientsRest-DVCCAU46.js",
       "_InputFormGroup-CbC6wfYG.js",
-      "_TextareaFormGroup-tR55Sx8T.js",
+      "_TextareaFormGroup-BpqcCay1.js",
       "_SetSelectValue-DWTlIjxO.js",
       "_DropdownItem-C44nCH4H.js",
       "_DropdownEnd-BYB3sEi0.js",
@@ -366,7 +366,7 @@
     ]
   },
   "resources/js/Leads.jsx": {
-    "file": "assets/Leads-BepIG8Zz.js",
+    "file": "assets/Leads-DZJ1gluI.js",
     "name": "Leads",
     "src": "resources/js/Leads.jsx",
     "isEntry": true,
@@ -381,7 +381,7 @@
       "_Modal-B5WsfZSb.js",
       "_DxPanelButton-C0qIehcU.js",
       "_InputFormGroup-CbC6wfYG.js",
-      "_TextareaFormGroup-tR55Sx8T.js",
+      "_TextareaFormGroup-BpqcCay1.js",
       "_SelectFormGroup-De8kv9FA.js",
       "_TippyButton-y94h_H6m.js",
       "_SetSelectValue-DWTlIjxO.js",
@@ -412,7 +412,7 @@
     ]
   },
   "resources/js/Pages.jsx": {
-    "file": "assets/Pages-CRfP-Gy0.js",
+    "file": "assets/Pages-CHqR9O7m.js",
     "name": "Pages",
     "src": "resources/js/Pages.jsx",
     "isEntry": true,
@@ -423,14 +423,14 @@
       "_Modal-B5WsfZSb.js",
       "_DxPanelButton-C0qIehcU.js",
       "_InputFormGroup-CbC6wfYG.js",
-      "_TextareaFormGroup-tR55Sx8T.js",
+      "_TextareaFormGroup-BpqcCay1.js",
       "_TippyButton-y94h_H6m.js",
       "_SelectFormGroup-De8kv9FA.js",
       "_server.browser-BDv8EdO-.js"
     ]
   },
   "resources/js/Permissions.jsx": {
-    "file": "assets/Permissions-CHZVSEj3.js",
+    "file": "assets/Permissions-CdtAc8-M.js",
     "name": "Permissions",
     "src": "resources/js/Permissions.jsx",
     "isEntry": true,
@@ -442,13 +442,13 @@
       "_Modal-B5WsfZSb.js",
       "_DxPanelButton-C0qIehcU.js",
       "_InputFormGroup-CbC6wfYG.js",
-      "_TextareaFormGroup-tR55Sx8T.js",
+      "_TextareaFormGroup-BpqcCay1.js",
       "_TippyButton-y94h_H6m.js",
       "_server.browser-BDv8EdO-.js"
     ]
   },
   "resources/js/Processes.jsx": {
-    "file": "assets/Processes-Cl4sSyUD.js",
+    "file": "assets/Processes-DQcx-G81.js",
     "name": "Processes",
     "src": "resources/js/Processes.jsx",
     "isEntry": true,
@@ -458,13 +458,13 @@
       "_Modal-B5WsfZSb.js",
       "_DxPanelButton-C0qIehcU.js",
       "_InputFormGroup-CbC6wfYG.js",
-      "_TextareaFormGroup-tR55Sx8T.js",
+      "_TextareaFormGroup-BpqcCay1.js",
       "_DxButton-CsjWvhyj.js",
       "_server.browser-BDv8EdO-.js"
     ]
   },
   "resources/js/Products.jsx": {
-    "file": "assets/Products-tnewV-u5.js",
+    "file": "assets/Products-CXNYK7_s.js",
     "name": "Products",
     "src": "resources/js/Products.jsx",
     "isEntry": true,
@@ -473,7 +473,7 @@
       "_Adminto-Do8tLT0J.js",
       "_Modal-B5WsfZSb.js",
       "_InputFormGroup-CbC6wfYG.js",
-      "_TextareaFormGroup-tR55Sx8T.js",
+      "_TextareaFormGroup-BpqcCay1.js",
       "_server.browser-BDv8EdO-.js",
       "_Number2Currency-e57Tgsuk.js"
     ]
@@ -490,7 +490,7 @@
     ]
   },
   "resources/js/Projects.jsx": {
-    "file": "assets/Projects-CLxNnHeu.js",
+    "file": "assets/Projects-Cd4990FN.js",
     "name": "Projects",
     "src": "resources/js/Projects.jsx",
     "isEntry": true,
@@ -506,7 +506,7 @@
       "_DxPanelButton-C0qIehcU.js",
       "_DxButton-CsjWvhyj.js",
       "_InputFormGroup-CbC6wfYG.js",
-      "_TextareaFormGroup-tR55Sx8T.js",
+      "_TextareaFormGroup-BpqcCay1.js",
       "_DxBox-DJwe9jMP.js",
       "_SelectFormGroup-De8kv9FA.js",
       "_TippyButton-y94h_H6m.js",
@@ -516,7 +516,7 @@
     ]
   },
   "resources/js/Roles.jsx": {
-    "file": "assets/Roles-_OopuKNW.js",
+    "file": "assets/Roles-Ck8nRx9i.js",
     "name": "Roles",
     "src": "resources/js/Roles.jsx",
     "isEntry": true,
@@ -528,13 +528,13 @@
       "_Modal-B5WsfZSb.js",
       "_DxPanelButton-C0qIehcU.js",
       "_InputFormGroup-CbC6wfYG.js",
-      "_TextareaFormGroup-tR55Sx8T.js",
+      "_TextareaFormGroup-BpqcCay1.js",
       "_TippyButton-y94h_H6m.js",
       "_server.browser-BDv8EdO-.js"
     ]
   },
   "resources/js/Sessions.jsx": {
-    "file": "assets/Sessions-4ixHrKP-.js",
+    "file": "assets/Sessions-BNzHHDX_.js",
     "name": "Sessions",
     "src": "resources/js/Sessions.jsx",
     "isEntry": true,
@@ -544,12 +544,12 @@
       "_Modal-B5WsfZSb.js",
       "_InputFormGroup-CbC6wfYG.js",
       "_SelectFormGroup-De8kv9FA.js",
-      "_TextareaFormGroup-tR55Sx8T.js",
+      "_TextareaFormGroup-BpqcCay1.js",
       "_google-K1CXqkDy.js"
     ]
   },
   "resources/js/Settings.jsx": {
-    "file": "assets/Settings-Bvxzyvdx.js",
+    "file": "assets/Settings-DDrqU_6h.js",
     "name": "Settings",
     "src": "resources/js/Settings.jsx",
     "isEntry": true,
@@ -560,7 +560,7 @@
       "_QuillFormGroup-Byk8gSEN.js",
       "_SelectFormGroup-De8kv9FA.js",
       "_Editor-oElHw87E.js",
-      "_TextareaFormGroup-tR55Sx8T.js",
+      "_TextareaFormGroup-BpqcCay1.js",
       "_index-DE8gkn8h.js"
     ],
     "css": [
@@ -569,7 +569,7 @@
     ]
   },
   "resources/js/Statuses.jsx": {
-    "file": "assets/Statuses-CB2MbdmD.js",
+    "file": "assets/Statuses-vX-tizVd.js",
     "name": "Statuses",
     "src": "resources/js/Statuses.jsx",
     "isEntry": true,
@@ -580,11 +580,11 @@
       "_Adminto-Do8tLT0J.js",
       "_Modal-B5WsfZSb.js",
       "_InputFormGroup-CbC6wfYG.js",
-      "_TextareaFormGroup-tR55Sx8T.js"
+      "_TextareaFormGroup-BpqcCay1.js"
     ]
   },
   "resources/js/Tables.jsx": {
-    "file": "assets/Tables-CqWQudT2.js",
+    "file": "assets/Tables-Dei2aa7i.js",
     "name": "Tables",
     "src": "resources/js/Tables.jsx",
     "isEntry": true,
@@ -595,7 +595,7 @@
       "_Modal-B5WsfZSb.js",
       "_DxPanelButton-C0qIehcU.js",
       "_InputFormGroup-CbC6wfYG.js",
-      "_TextareaFormGroup-tR55Sx8T.js",
+      "_TextareaFormGroup-BpqcCay1.js",
       "_TippyButton-y94h_H6m.js",
       "_server.browser-BDv8EdO-.js"
     ]
@@ -621,7 +621,7 @@
     ]
   },
   "resources/js/Templates.jsx": {
-    "file": "assets/Templates-BwJ4Ddx3.js",
+    "file": "assets/Templates-C6e2Qx4q.js",
     "name": "Templates",
     "src": "resources/js/Templates.jsx",
     "isEntry": true,
@@ -632,7 +632,7 @@
       "_Modal-B5WsfZSb.js",
       "_DxPanelButton-C0qIehcU.js",
       "_InputFormGroup-CbC6wfYG.js",
-      "_TextareaFormGroup-tR55Sx8T.js",
+      "_TextareaFormGroup-BpqcCay1.js",
       "_TippyButton-y94h_H6m.js",
       "_SelectFormGroup-De8kv9FA.js",
       "_Editor-oElHw87E.js",
@@ -642,7 +642,7 @@
     ]
   },
   "resources/js/Types.jsx": {
-    "file": "assets/Types-DYh6LE5F.js",
+    "file": "assets/Types-D2BeNoku.js",
     "name": "Types",
     "src": "resources/js/Types.jsx",
     "isEntry": true,
@@ -654,7 +654,7 @@
       "_Modal-B5WsfZSb.js",
       "_DxPanelButton-C0qIehcU.js",
       "_InputFormGroup-CbC6wfYG.js",
-      "_TextareaFormGroup-tR55Sx8T.js",
+      "_TextareaFormGroup-BpqcCay1.js",
       "_TippyButton-y94h_H6m.js",
       "_server.browser-BDv8EdO-.js"
     ]
@@ -671,7 +671,7 @@
     ]
   },
   "resources/js/Views.jsx": {
-    "file": "assets/Views-Cb0gMgWt.js",
+    "file": "assets/Views-D-1nBxoz.js",
     "name": "Views",
     "src": "resources/js/Views.jsx",
     "isEntry": true,
@@ -680,7 +680,7 @@
       "_Adminto-Do8tLT0J.js",
       "_Modal-B5WsfZSb.js",
       "_InputFormGroup-CbC6wfYG.js",
-      "_TextareaFormGroup-tR55Sx8T.js"
+      "_TextareaFormGroup-BpqcCay1.js"
     ]
   },
   "resources/js/components/svg/google.svg": {
