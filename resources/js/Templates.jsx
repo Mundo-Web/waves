@@ -255,6 +255,78 @@ const Templates = ({ TINYMCE_KEY, sessions }) => {
     setAttachmentPreview(null)
   }, [attachment])
 
+  const onStatusChange = async ({ id, status }) => {
+    const result = await templatesRest.status({ id, status })
+    if (!result) return
+    $(gridRef.current).dxDataGrid('instance').refresh()
+  }
+
+  const onDeleteClicked = async (id) => {
+    const { isConfirmed } = await Swal.fire({
+      title: 'Eliminar registro',
+      text: '¿Está seguro de eliminar este registro?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Si, eliminar!',
+      cancelButtonText: 'Cancelar'
+    })
+    if (!isConfirmed) return
+    const result = await templatesRest.delete(id)
+    if (!result) return
+    $(gridRef.current).dxDataGrid('instance').refresh()
+  }
+
+  const onTypeEditionClicked = (newType) => {
+    setTypeEdition(old => {
+      if (old == 'wysiwyg' && newType == 'code') {
+        codeEditorRef.current.setValue(html_beautify(wysiwygContent, {
+          indent_empty_lines: true,
+          preserve_newlines: true,
+          max_preserve_newlines: 1,
+          indent_size: 2
+        }))
+        setTimeout(() => {
+          codeEditorRef.current.refresh()
+        }, 125);
+      } else if (old == 'wysiwyg' && newType == 'dropzone') {
+        setDropzoneContent(wysiwygContent)
+      } else if (old == 'code' && newType == 'wysiwyg') {
+        setWysiwygContent(codeContent)
+      } else if (old == 'code' && newType == 'dropzone') {
+        setDropzoneContent(codeContent)
+      } else if (old == 'dropzone' && newType == 'wysiwyg') {
+        setWysiwygContent(dropzoneContent)
+      } else if (old == 'dropzone' && newType == 'code') {
+        codeEditorRef.current.setValue(html_beautify(dropzoneContent, {
+          indent_empty_lines: true,
+          preserve_newlines: true,
+          max_preserve_newlines: 1,
+          indent_size: 2
+        }))
+        setTimeout(() => {
+          codeEditorRef.current.refresh()
+        }, 125);
+      }
+      return newType
+    })
+  }
+
+  const onDropzoneChange = (file) => {
+    file.text().then(content => {
+      const container = $(`<body>`).html(content)
+
+      container.find('style').remove()
+      container.find('script').remove()
+      container.find('meta').remove()
+      container.find('title').remove()
+      container.find('link').remove()
+
+      setDropzoneContent(container.html().trim())
+    })
+  }
+
   return (<>
     <div hidden={isDesigning}>
       <Table gridRef={gridRef} title='Plantillas' rest={templatesRest}
