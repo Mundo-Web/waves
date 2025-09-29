@@ -5,10 +5,12 @@ import BusinessCard from "../Reutilizables/Business/BusinessCard"
 import NotificationsRest from "../actions/NotificationsRest"
 import NotificationItem from "./notification/NotificationItem"
 import Global from "../Utils/Global"
+import UsersByServicesByBusinessesRest from "../actions/Atalaya/UsersByServicesByBusinessesRest"
 
 const notificationsRest = new NotificationsRest();
+const usersByServicesByBusinessesRest = new UsersByServicesByBusinessesRest();
 
-const NavBar = ({ can, session = {}, title = '', whatsappStatus, businesses, APP_PROTOCOL, APP_DOMAIN, notificationsCount }) => {
+const NavBar = ({ can, session = {}, title = '', whatsappStatus, businesses, services, APP_PROTOCOL, APP_DOMAIN, notificationsCount }) => {
 
   const settings = Local.get('adminto_settings') ?? {}
 
@@ -16,6 +18,21 @@ const NavBar = ({ can, session = {}, title = '', whatsappStatus, businesses, APP
 
   const [notifications, setNotifications] = useState([]);
   const [theme, setTheme] = useState(settings.theme ?? 'ligth');
+
+  const onServiceOpen = async ({ correlative, i_work, status }) => {
+    if (!status) return
+
+    if (!i_work) {
+      location.href = `${APP_PROTOCOL}://${APP_DOMAIN}/businesses`
+      return
+    }
+
+    const result = await usersByServicesByBusinessesRest.authorize({
+      service: correlative
+    })
+    if (!result) return
+    location.href = `${APP_PROTOCOL}://${correlative}.${APP_DOMAIN}/home`
+  }
 
   useEffect(() => {
     document.title = `${title} | ${Global.APP_NAME}`
@@ -158,8 +175,8 @@ const NavBar = ({ can, session = {}, title = '', whatsappStatus, businesses, APP
             <i className="fe-bell noti-icon"></i>
             {
               notificationsCount > 0 ?
-              <span className="badge bg-danger rounded-circle noti-icon-badge">{notificationsCount}</span>
-              : ''
+                <span className="badge bg-danger rounded-circle noti-icon-badge">{notificationsCount}</span>
+                : ''
             }
           </a>
           <div id="notifications" className="dropdown-menu dropdown-menu-end dropdown-lg">
@@ -189,6 +206,76 @@ const NavBar = ({ can, session = {}, title = '', whatsappStatus, businesses, APP
               <i className="fe-arrow-right"></i>
             </a> */}
 
+          </div>
+        </li>
+
+        <li className="dropdown notification-list topbar-dropdown">
+          <a className="nav-link dropdown-toggle waves-effect waves-light" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
+            <i className="fe-grid noti-icon"></i>
+          </a>
+          <div className="dropdown-menu dropdown-menu-end dropdown-lg">
+            <div className="dropdown-header noti-title pb-0">
+              <h5 className="m-0">Aplicaciones</h5>
+            </div>
+            <div className="row g-0 gy-2 px-2 py-2">
+              {/* Mi cuenta */}
+              <div className="col-4 text-center">
+                <button
+                  onClick={() => window.location.href = `//${APP_DOMAIN}/account`}
+                  className="d-block btn-ligth bg-white rounded waves-effect p-1 pt-2 border-0 w-100"
+                  title="Mi cuenta"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="bottom"
+                >
+                  <img
+                    src={`//${APP_DOMAIN}/api/profile/thumbnail/${session.relative_id}`}
+                    alt="Mi cuenta"
+                    className="mb-1 rounded-circle"
+                    style={{ width: '40px', height: '40px' }}
+                  />
+                  <div className="small fw-semibold">Mi cuenta</div>
+                </button>
+              </div>
+
+              {/* Servicios restantes en grilla 3xN */}
+              {services.map((service, idx) => (
+                <div key={idx} className="col-4 text-center">
+                  <button
+                    disabled={!service.status || !service.i_work}
+                    onClick={() => onServiceOpen(service)}
+                    className="d-block btn-ligth bg-white rounded waves-effect p-1 pt-2 border-0 w-100"
+                    style={{ cursor: service.status && service.i_work ? 'pointer' : 'not-allowed' }}
+                    title={service.description}
+                  >
+                    <div className="position-relative d-inline-block mb-1">
+                      <img
+                        src={`//${service.correlative}.${Global.APP_DOMAIN}/assets/img/icon.svg`}
+                        onError={(e) => e.target.src = `//${APP_DOMAIN}/assets/img/icon.svg`}
+                        alt={service.name}
+                        style={{
+                          width: '40px', height: '40px',
+                          objectFit: 'contain', objectPosition: 'center',
+                          opacity: service.status && service.i_work ? 1 : 0.75
+                        }}
+                      />
+                      {!service.status && (
+                        <span className="position-absolute top-50 start-50 translate-middle badge rounded-pill bg-danger" style={{ fontSize: '8px' }}>
+                          Proximamente
+                        </span>
+                      )}
+                      {
+                        service.status && !service.i_work && (
+                          <span className="position-absolute top-50 start-50 translate-middle badge rounded-pill bg-secondary" style={{ fontSize: '8px' }}>
+                            Por activar
+                          </span>
+                        )
+                      }
+                    </div>
+                    <div className="small fw-semibold text-truncate">{service.name}</div>
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         </li>
 

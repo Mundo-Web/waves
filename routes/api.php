@@ -34,6 +34,9 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\UtilController;
 use App\Http\Controllers\ViewController;
 use App\Http\Controllers\WhatsAppController;
+
+use App\Http\Controllers\Atalaya\UsersByServicesByBusinessController as AtalayaUsersByServicesByBusinessController;
+
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -250,4 +253,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/gmail/details/{id}', [GmailController::class, 'getDetails']);
     Route::get('/gmail/attachment/{messageId}/{attachmentId}/{filename}', [GmailController::class, 'getAttachment']);
     Route::post('/gmail/send', [GmailController::class, 'send']);
+
+    Route::prefix('/atalaya')->group(function () {
+        Route::post('/users-by-services-by-business/authorize', [AtalayaUsersByServicesByBusinessController::class, 'activeService']);
+    });
 });
