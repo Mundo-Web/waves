@@ -4,7 +4,7 @@ import SessionsRest from "../../actions/SessionsRest";
 
 const sessionsRest = new SessionsRest()
 
-const SessionCard = ({ onModalOpen, onPingModalOpen, onWhatsAppModalOpen, ...session }) => {
+const SessionCard = ({ onModalOpen, onPingModalOpen, onWhatsAppModalOpen, onSessionDelete, ...session }) => {
 
   const [isActive, setIsActive] = useState(null)
 
@@ -64,11 +64,11 @@ const SessionCard = ({ onModalOpen, onPingModalOpen, onWhatsAppModalOpen, ...ses
                 <i className='mdi mdi-pencil'></i>
               </button>
             </Tippy>
-            {/* <Tippy content='Desactivar'>
-              <button className='btn btn-xs btn-light rounded-pill waves-effect'>
-                <i className='mdi mdi-toggle-switch text-success'></i>
+            <Tippy content='Eliminar'>
+              <button className='btn btn-xs btn-danger rounded-pill waves-effect' onClick={() => onSessionDelete(session)}>
+                <i className='mdi mdi-delete'></i>
               </button>
-            </Tippy> */}
+            </Tippy>
           </div>
         </div>
       </div>

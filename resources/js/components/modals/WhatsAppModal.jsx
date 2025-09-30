@@ -111,8 +111,17 @@ const WhatsAppModal = ({ modalRef, dataLoaded, onReady }) => {
           <div className="text-center">
             <button type='button' className='btn-close position-absolute top-0 end-0 me-2 mt-2' data-bs-dismiss='modal' aria-label='Close'></button>
             <i className={`${icon} h1 text-${color} my-2 d-block`}></i>
-            <h4 className="mt-2">{text} {status == 'loading_screen' && `[${percent}%]`}</h4>
-            <div ref={qrRef} id="qr-code" className={`mt-3 text-center ${status == 'qr' ? 'd-block' : 'd-none'}`}>
+            <h4 className="mt-2">{text} {status == 'loading_screen' && percent && `[${percent}%]`}</h4>
+            <div className="position-relative" hidden={status !== 'qr'}>
+              <img className="position-absolute" src={`/assets/img/icon-border.svg`} alt='Atalaya' style={{
+                width: '30px',
+                aspectRatio: '30px',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+              }} />
+              <div ref={qrRef} id="qr-code" className={`mt-3 text-center ${status == 'qr' ? 'd-block' : 'd-none'}`}>
+              </div>
             </div>
             {
               status == 'ready' && <div className="d-block py-2">
@@ -126,7 +135,7 @@ const WhatsAppModal = ({ modalRef, dataLoaded, onReady }) => {
         </div>
       </div>
     </div>
-  </div>)
+  </div >)
 }
 
 export default WhatsAppModal;

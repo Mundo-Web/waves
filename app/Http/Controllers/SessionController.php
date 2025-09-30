@@ -21,7 +21,10 @@ class SessionController extends BasicController
 
   public function setReactViewProperties(Request $request)
   {
-    $sessions = $this->model::where('business_id', Auth::user()->business_id)->get();
+    $sessions = $this->model::query()
+    ->where('business_id', Auth::user()->business_id)
+    ->whereNotNull('status')
+    ->get();
     return [
       'sessions' => $sessions
     ];
@@ -143,6 +146,37 @@ class SessionController extends BasicController
           throw new Exception($data['message'] ?? 'Ocurrio un error al enviar el ping');
         }
       }
+    });
+
+    return response($response->toArray(), $response->status);
+  }
+
+  public function delete(Request $request, string $id)
+  {
+    $response = Response::simpleTryCatch(function () use ($id) {
+      $session = Session::find($id);
+      if (!$session) throw new Exception('Sesión no encontrada');
+
+      if ($session->type === 'WhatsApp') {
+        $businessJpa = Business::with(['person'])->find(Auth::user()->business_id);
+        if (!$businessJpa) throw new Exception('Empresa no encontrada');
+
+        $instanceName = $businessJpa->person->document_number . '-' . $session->id;
+
+        $res = new Fetch(env('EVOAPI_URL') . '/instance/delete/' . $instanceName, [
+          'method' => 'DELETE',
+          'headers' => ['apikey' => $businessJpa->uuid]
+        ]);
+
+        // if (!$res->ok) {
+        //   $data = $res->json();
+        //   throw new Exception($data['message'] ?? 'Error al eliminar la instancia de WhatsApp');
+        // }
+      }
+
+      $session->update([
+        'status' => null
+      ]);
     });
 
     return response($response->toArray(), $response->status);

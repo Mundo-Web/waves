@@ -13,6 +13,7 @@ import SelectFormGroup from './components/form/SelectFormGroup';
 import TextareaFormGroup from './components/form/TextareaFormGroup';
 import WhatsAppModal from './components/modals/WhatsAppModal';
 import googleSVG from './components/svg/google.svg';
+import Swal from 'sweetalert2';
 
 const sessionsRest = new SessionsRest()
 
@@ -170,6 +171,26 @@ const KPILeads = ({ sessions: sessionsDB = [] }) => {
     $(whatsAppModalRef.current).modal('show')
   }
 
+  const onSessionDelete = async ({ id, name }) => {
+    const { isConfirmed } = await Swal.fire({
+      title: `¿Eliminar la sesión "${name}"?`,
+      text: 'Esta acción no se puede deshacer.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#71b6f9',
+      cancelButtonColor: '#ff5b5b',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    });
+    if (!isConfirmed) return
+
+    const deleted = await sessionsRest.delete(id);
+    if (deleted) {
+      setSessions(old => old.filter(session => session.id !== id));
+      Swal.fire('Eliminado', 'La sesión ha sido eliminada.', 'success');
+    }
+  }
+
   return <>
     <main className='d-flex align-items-center justify-content-center gap-2' style={{ height: 'calc(100vh - 160px)' }}>
       <div className="card btn btn-light waves-effect mb-0" onClick={() => onModalOpen()} style={{
@@ -185,7 +206,7 @@ const KPILeads = ({ sessions: sessionsDB = [] }) => {
         </div>
       </div>
       {
-        sessions.map((session, index) => <SessionCard key={index} onModalOpen={onModalOpen} onPingModalOpen={onPingModalOpen} onWhatsAppModalOpen={onWhatsAppModalOpen} {...session} />)
+        sessions.map((session, index) => <SessionCard key={index} onModalOpen={onModalOpen} onPingModalOpen={onPingModalOpen} onWhatsAppModalOpen={onWhatsAppModalOpen} onSessionDelete={onSessionDelete} {...session} />)
       }
     </main>
     <Modal modalRef={modalRef} title={`Agregar cuenta${accountType ? ` - ${accountType}` : ''}`} hideFooter={!accountType} onSubmit={onModalSubmit}>
