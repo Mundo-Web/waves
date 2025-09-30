@@ -22,9 +22,9 @@ class SessionController extends BasicController
   public function setReactViewProperties(Request $request)
   {
     $sessions = $this->model::query()
-    ->where('business_id', Auth::user()->business_id)
-    ->whereNotNull('status')
-    ->get();
+      ->where('business_id', Auth::user()->business_id)
+      ->whereNotNull('status')
+      ->get();
     return [
       'sessions' => $sessions
     ];
