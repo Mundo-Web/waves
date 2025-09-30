@@ -10,7 +10,7 @@ const SessionCard = ({ onModalOpen, onPingModalOpen, onWhatsAppModalOpen, onSess
 
   useEffect(() => {
     verify()
-  }, [null]);
+  }, [session.updated_at]);
 
   const verify = async (showNotify = false) => {
     setIsActive(null)

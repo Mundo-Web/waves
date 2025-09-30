@@ -328,7 +328,7 @@ const KPILeads = ({ sessions: sessionsDB = [] }) => {
     </Modal>
 
     <WhatsAppModal modalRef={whatsAppModalRef} dataLoaded={sessionLoaded} onReady={async data => {
-      const result = sessionsRest.save(data)
+      const result = await sessionsRest.save(data)
       if (!result) return
       setSessions(old => {
         return old.map(x => {

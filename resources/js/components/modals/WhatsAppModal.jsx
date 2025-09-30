@@ -5,14 +5,54 @@ import Swal from "sweetalert2";
 import Tippy from "@tippyjs/react";
 import { Notify } from "sode-extend-react";
 import Global from "../../Utils/Global";
+import SessionsRest from "../../actions/SessionsRest";
+
+const sessionsRest = new SessionsRest()
+let eventSource = {}
 
 const WhatsAppModal = ({ modalRef, dataLoaded, onReady }) => {
   const qrRef = useRef()
 
-  const [status, setStatus] = useState('verifying')
+  const [status, setStatus] = useState(null)
   const { color, icon, text } = WhatsAppStatuses[status]
   const [percent, setPercent] = useState(0)
   const [sessionInfo, setSessionInfo] = useState({})
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const handleShow = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleHide = () => {
+    eventSource?.close?.()
+    setIsModalOpen(false);
+    setStatus(null)
+    setSessionInfo({})
+  };
+
+  useEffect(() => {
+    const modalElement = document.getElementById('whatsapp-modal');
+
+    modalElement.addEventListener('show.bs.modal', handleShow);
+    modalElement.addEventListener('hide.bs.modal', handleHide);
+
+    return () => {
+      modalElement.removeEventListener('show.bs.modal', handleShow);
+      modalElement.removeEventListener('hide.bs.modal', handleHide);
+    };
+  }, [status]);
+
+  const verify = async (showNotify = false) => {
+    const verification = await sessionsRest.verify(dataLoaded.id, showNotify)
+    onReady({
+      id: dataLoaded.id,
+      metadata: {
+        name: verification.pushname,
+        email: `${verification.me.user}@${verification.me.server}`,
+        phone: verification.me.user
+      }
+    })
+  }
 
   useEffect(() => {
     if (!dataLoaded) return
@@ -21,7 +61,7 @@ const WhatsAppModal = ({ modalRef, dataLoaded, onReady }) => {
         session: dataLoaded?.id
       })
 
-      let eventSource = new EventSource(`/api/whatsapp/verify?${searchParams}`)
+      eventSource = new EventSource(`/api/whatsapp/verify?${searchParams}`)
       eventSource.onmessage = ({ data }) => {
         if (data == 'ping') return console.log('Realtime active')
         const { status, qr, percent, info } = JSON.parse(data)
@@ -79,8 +119,11 @@ const WhatsAppModal = ({ modalRef, dataLoaded, onReady }) => {
           setStatus('verifying')
         }, 5000)
       }
+    } else if (status == null && !isModalOpen) {
+      console.log('Realtime closed: Modal cerrado')
+      verify()
     }
-  }, [status, dataLoaded])
+  }, [status, dataLoaded, isModalOpen])
 
   const onCloseClicked = async () => {
     const { isConfirmed } = await Swal.fire({
@@ -104,7 +147,7 @@ const WhatsAppModal = ({ modalRef, dataLoaded, onReady }) => {
     setStatus('verifying')
   }
 
-  return (<div ref={modalRef} className="modal fade" aria-hidden="true" data-bs-backdrop='static' >
+  return (<div ref={modalRef} id="whatsapp-modal" className="modal fade" aria-hidden="true" data-bs-backdrop='static' >
     <div className="modal-dialog modal-sm modal-dialog-centered">
       <div className="modal-content">
         <div className="modal-body">
@@ -123,6 +166,13 @@ const WhatsAppModal = ({ modalRef, dataLoaded, onReady }) => {
               <div ref={qrRef} id="qr-code" className={`mt-3 text-center ${status == 'qr' ? 'd-block' : 'd-none'}`}>
               </div>
             </div>
+            {
+              status == null &&
+              <button className="btn btn-sm btn-dark waves-effect waves-light mt-2" type="button" onClick={() => setStatus('verifying')}>
+                <i className="mdi mdi-qrcode-plus me-1"></i>
+                Generar QR
+              </button>
+            }
             {
               status == 'ready' && <div className="d-block py-2">
                 <b>{sessionInfo?.pushname}</b>
